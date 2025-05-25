@@ -1,0 +1,73 @@
+<!-- pages/learner/home/home.wxml -->
+<view class="container home-page-container"> <!-- 改为 home-page-container 以便更精确控制 -->
+    <!-- 问候语 -->
+    <view class="greeting-section">
+        <text class="h1">👋 你好, {{userName}}!</text>
+        <text class="p sub-greeting">今天也要努力学习手语哦~</text>
+    </view>
+
+    <!-- 错误提示占位 -->
+    <view wx:if="{{errorMessage}}" class="error-message">{{errorMessage}}</view>
+
+    <!-- 每日挑战卡片 -->
+    <view class="card daily-challenge-card" bindtap="navigateToDailyChallenge">
+        <view class="card-header">
+            <text class="h3">每日挑战</text>
+            <text class="text-sm streak-text">已连续打卡 {{dashboardData.checkInStreak}} 天</text>
+        </view>
+        <text class="p card-description">挑战今日份的手语词汇，看看你的掌握程度吧！</text>
+        <button class="btn btn-secondary btn-card-action">开始挑战</button> <!-- 统一按钮类名 -->
+    </view>
+
+    <!-- 学习进度卡片 -->
+    <text class="section-title h2">学习进度</text>
+    <view class="card progress-card">
+        <view class="card-header"> <!-- 复用 card-header 结构 -->
+            <text class="font-bold text-dark">本周学习时长</text>
+            <text class="text-accent font-bold study-hours">{{dashboardData.weeklyStudyHours}} 小时</text>
+        </view>
+        <view class="line-chart-container">
+             <!-- 使用 ec-canvas 组件 -->
+        <ec-canvas id="learn-progress-chart" canvas-id="learn-progress-canvas" ec="{{ ec }}"></ec-canvas>
+        <view class="chart-labels">
+            <!-- 标签可以根据实际数据动态生成，或保持静态 -->
+            <text wx:for="{{dashboardData.dailyStudyDataPoints}}" wx:key="day" wx:if="{{dashboardData.dailyStudyDataPoints.length > 0}}">{{item.dayShort || item.day}}</text>
+            <!-- 或者静态标签 -->
+            <text wx:if="{{!dashboardData.dailyStudyDataPoints || dashboardData.dailyStudyDataPoints.length === 0}}">周一</text>
+            <text wx:if="{{!dashboardData.dailyStudyDataPoints || dashboardData.dailyStudyDataPoints.length === 0}}">周二</text>
+            <!-- ... 其他静态标签 ... -->
+        </view>
+            <view class="chart-labels">
+                <text>周一</text><text>周二</text><text>周三</text><text>周四</text><text>周五</text><text>周六</text><text>周日</text>
+            </view>
+        </view>
+    </view>
+
+    <!-- 快速访问卡片 -->
+    <text class="section-title h2">快速访问</text>
+    <view class="card quick-access-card">
+        <view class="quick-access-item" bindtap="navigateToEncyclopedia">
+            <view class="item-content">
+                <image class="item-icon" src="/assets/images/icon-book.png" mode="aspectFit"/>
+                <text class="text-dark font-bold item-text">手势百科</text>
+            </view>
+            <image class="item-arrow" src="/assets/images/icon-chevron-right.png" mode="aspectFit"/>
+        </view>
+        <view class="hr"></view>
+        <view class="quick-access-item" bindtap="navigateToErrorReview">
+            <view class="item-content">
+                <image class="item-icon" src="/assets/images/icon-learn.png" mode="aspectFit"/>
+                <text class="text-dark font-bold item-text">错题回顾</text>
+            </view>
+            <image class="item-arrow" src="/assets/images/icon-chevron-right.png" mode="aspectFit"/>
+        </view>
+    </view>
+
+    <!-- 推荐挑战卡片 -->
+    <text class="section-title h2">推荐挑战</text>
+    <view class="card recommended-challenge-card" wx:if="{{dashboardData.recommendedChallenge}}">
+        <text class="text-dark font-bold challenge-title">手语 "{{dashboardData.recommendedChallenge.title}}"</text>
+        <text class="p challenge-description">{{dashboardData.recommendedChallenge.description}}</text>
+        <button class="btn btn-secondary btn-sm btn-card-action" bindtap="practiceRecommendedChallenge">去练习</button> <!-- 统一按钮类名 -->
+    </view>
+</view>

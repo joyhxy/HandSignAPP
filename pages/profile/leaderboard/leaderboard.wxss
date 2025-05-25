@@ -1,0 +1,92 @@
+/* pages/profile/leaderboard/leaderboard.wxss */
+page { /* ...全局变量... */ }
+.leaderboard-page-container {
+    padding: 30rpx 40rpx 40rpx; background-color: #F8F4F0; min-height: 100vh;
+}
+
+.page-main-title { /* h1 */
+    display: block; font-size: 48rpx; font-weight: 600;
+    color: var(--text-color-dark); margin-bottom: 30rpx; text-align: left;
+}
+
+/* Filter Chips (复用 store/home 或 activityList 的样式) */
+.filter-chips-scroll { width: 100%; white-space: nowrap; margin-bottom: 30rpx; }
+.filter-chips { display: flex; gap: 16rpx; }
+.chip {
+    display: inline-block; padding: 12rpx 24rpx; border-radius: 30rpx;
+    background: var(--form-bg, white); color: var(--text-color-light);
+    font-size: 26rpx; white-space: nowrap;
+}
+.chip.active { background-color: var(--accent-color); color: white; }
+
+.card { /* 通用卡片 */
+    background: var(--card-bg, white); border-radius: var(--border-radius-md); /* 排行榜卡片圆角可以小一些 */
+    padding: 20rpx 30rpx; margin-bottom: 20rpx; box-shadow: var(--shadow-soft);
+    width: 100%; border: none;
+}
+
+.user-rank-highlight-card { /* 当前用户高亮卡片 */
+    border: 4rpx solid var(--accent-color); /* UI稿高亮边框 */
+    margin-bottom: 30rpx;
+    padding: 24rpx 30rpx; /* 内边距稍大 */
+}
+
+.rank-item { /* 卡片内每行排名的容器 */
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+.rank-number {
+    font-size: 32rpx; /* UI稿 #15 较大 */
+    font-weight: 600; /* UI稿 font-bold */
+    color: var(--text-color-dark);
+    width: 100rpx; /* 给排名数字固定宽度，方便对齐 */
+    flex-shrink: 0;
+    text-align: left;
+}
+.user-rank-highlight-card .rank-number { color: var(--accent-color); }
+.rank-medal { margin-left: 6rpx; font-size: 30rpx; } /* 奖牌图标大小 */
+.top-three .rank-number { /* 前三名的数字颜色，通过奖牌区分 */
+    /* color: gold / silver / bronze or use text-dark */
+}
+/* 根据UI稿，前三名的#1 #2 #3颜色可能不同 */
+.top-1 .rank-number { color: #FFD700; /* 金色 */ }
+.top-2 .rank-number { color: #C0C0C0; /* 银色 */ }
+.top-3 .rank-number { color: #CD7F32; /* 铜色 */ }
+
+
+.avatar.user-avatar {
+    width: 80rpx; /* UI稿 avatar 50px (这里用40px=80rpx) */
+    height: 80rpx;
+    border-radius: 50%;
+    margin-left: 10rpx; /* 排名数字与头像间距 */
+    margin-right: 24rpx; /* 头像与用户名的间距，UI稿gap-15 */
+    background-color: var(--placeholder-bg);
+    flex-shrink: 0;
+}
+
+.user-name {
+    font-size: 28rpx; /* UI稿 14px */
+    color: var(--text-color-dark);
+    flex-grow: 1; /* 占据剩余空间，将分数推到右边 */
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; /* 防止用户名过长 */
+}
+.user-rank-highlight-card .user-name { font-weight: 600; }
+.top-three .user-name { font-weight: 600; }
+
+
+.score {
+    font-size: 28rpx; /* UI稿 14px */
+    color: var(--text-color-dark);
+    font-weight: 500; /* medium */
+    flex-shrink: 0; /* 防止被压缩 */
+}
+.user-rank-highlight-card .score { color: var(--accent-color); font-weight: 600;}
+.top-three .score { font-weight: 600; }
+
+
+.current-user-entry { /* 如果列表中的某一项是当前用户，也可以高亮 */
+    /* background-color: #FFF8E1; */ /* 示例：浅黄色高亮 */
+}
+.empty-leaderboard { text-align: center; padding: 60rpx 0; }
+.empty-leaderboard .p { font-size: 28rpx; color: var(--text-color-light); }

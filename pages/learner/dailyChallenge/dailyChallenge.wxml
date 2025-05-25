@@ -1,0 +1,37 @@
+<!-- pages/learner/dailyChallenge/dailyChallenge.wxml -->
+<view class="container challenge-container">
+    <text class="h2 page-title">每日挑战</text>
+
+    <view class="card challenge-card">
+        <text class="p instruction-text">请根据视频演示，选择正确的手语含义：</text>
+
+        <!-- 视频/动图占位符 -->
+        <view class="video-placeholder">
+            <!-- 可以用 image 标签放一个播放按钮图标 -->
+            <image class="play-icon" src="/assets/images/icon-play.png" mode="aspectFit"/>
+            <text class="placeholder-text">视频/动图 待补充</text>
+        </view>
+
+        <!-- 选项按钮 -->
+        <view class="options-group">
+            <button class="btn btn-option" wx:for="{{challengeData.options}}" wx:key="index" bindtap="selectOption" data-index="{{index}}"
+                    class="{{selectedOptionIndex === index ? 'btn-secondary active' : 'btn-secondary'}}">
+                {{item.label}}. {{item.text}}
+            </button>
+            <!-- 示例：
+            <button class="btn btn-option btn-secondary">A. 你好</button>
+            <button class="btn btn-option btn-secondary active">B. 谢谢</button> 
+            ...
+            -->
+        </view>
+
+        <button class="btn btn-primary btn-confirm" bindtap="confirmAnswer" disabled="{{selectedOptionIndex === null}}">确认答案</button>
+    </view>
+
+    <view class="card progress-info-card">
+        <view class="flex-between">
+            <text class="text-dark progress-text">今日进度: {{currentProgress}}/{{totalChallenges}}</text>
+            <text class="text-accent hint-text" bindtap="showHint">查看提示</text>
+        </view>
+    </view>
+</view>

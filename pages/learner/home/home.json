@@ -1,0 +1,8 @@
+
+{
+  "usingComponents": {
+    "ec-canvas": "/components/ec-canvas/ec-canvas" 
+  },
+  "navigationBarTitleText": "学习",
+  "enablePullDownRefresh": true 
+}

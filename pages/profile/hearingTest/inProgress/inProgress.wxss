@@ -1,0 +1,80 @@
+/* pages/profile/hearingTest/inProgress/inProgress.wxss */
+page { /* ...全局变量... */ }
+.test-in-progress-page {
+    padding: 40rpx; background-color: #EAEAEA; min-height: 100vh;
+    font-family: var(--font-family);
+    display: flex; flex-direction: column; align-items: center; /* 整体居中 */
+}
+
+.page-main-title { /* h1 */
+    display: block; font-size: 48rpx; font-weight: 600;
+    color: var(--text-color-dark); margin-bottom: 20rpx; /* UI稿 mb-15 */
+    text-align: center;
+}
+.progress-indicator { /* p */
+    font-size: 28rpx; color: var(--text-color-light);
+    margin-bottom: 10rpx; /* UI稿 mb-10 */
+}
+.instruction-text { /* p */
+    font-size: 28rpx; color: var(--text-color-light);
+    margin-bottom: 40rpx; /* UI稿 mb-20 */
+    text-align: center;
+}
+
+.card { /* 通用卡片 */
+    background: var(--card-bg, white); border-radius: var(--border-radius-lg);
+    padding: 30rpx; margin-bottom: 30rpx; box-shadow: var(--shadow-soft);
+    width: 100%; border: none;
+}
+.sound-area-card {
+    /* UI稿中此卡片占满宽度 */
+}
+.sound-wave-placeholder {
+    width: 100%;
+    min-height: 300rpx; /* UI稿 150px */
+    background-color: var(--placeholder-bg); /* UI稿 image-placeholder */
+    border-radius: var(--border-radius-md);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    margin-bottom: 20rpx; /* 与下方文字间距 */
+}
+.sound-icon {
+    width: 120rpx; /* UI稿 60px */
+    height: 120rpx;
+    margin-bottom: 20rpx; /* UI稿 mb-10 */
+    /* fill: var(--placeholder-text); for SVG */
+    opacity: 0.6; /* 图标颜色浅一点 */
+}
+.placeholder-text {
+    font-size: 28rpx; color: var(--placeholder-text);
+    line-height: 1.4; text-align: center;
+}
+.test-info-text { /* p text-sm text-center mt-10 */
+    display: block; text-align: center; margin-top: 20rpx;
+    font-size: 24rpx; color: var(--text-color-light);
+}
+
+.btn-full-width { /* 通用 */
+    width: 100%; display: block; border-radius: var(--border-radius-md);
+    font-weight: 500; text-align: center; line-height: 1.5;
+    border: none; box-shadow: var(--shadow-soft);
+}
+.btn-heard { /* btn btn-primary */
+    background-color: var(--accent-color); color: white;
+    padding: 28rpx 0; /* UI稿按钮较大 */
+    font-size: 36rpx; /* UI稿 18px */
+    margin-bottom: 30rpx; /* UI稿 mt-15 (两个按钮之间的间距) */
+}
+.btn-not-heard { /* btn btn-secondary */
+    background-color: var(--card-bg); color: var(--text-color-dark); /* UI稿中是浅色按钮 */
+    border: 1rpx solid #ddd; /* 给个浅边框 */
+    padding: 24rpx 0; /* 按钮比“我听到了”略小 */
+    font-size: 30rpx;
+    box-shadow: none; /* 次要按钮通常无阴影或更浅 */
+}
+.btn[disabled] {
+    background-color: #E0E0E0 !important; /* 确保禁用样式生效 */
+    color: #AAAAAA !important;
+    opacity: 1 !important;
+    box-shadow: none !important;
+}

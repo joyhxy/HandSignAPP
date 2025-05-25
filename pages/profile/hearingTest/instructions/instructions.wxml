@@ -1,0 +1,37 @@
+<!-- pages/profile/hearingTest/instructions/instructions.wxml -->
+<view class="container test-instructions-page">
+    <text class="h1 page-main-title">在线听力测试</text>
+
+    <view class="card preparation-card">
+        <view class="card-icon-wrapper">
+            <image class="card-icon" src="/assets/svgs/icon-headphones.svg" mode="aspectFit"/>
+        </view>
+        <text class="h3 card-title-main">测试前准备</text>
+        <view class="instruction-list">
+            <view class="instruction-item">
+                <text class="list-dot">•</text>
+                <text class="p">请确保您佩戴了耳机，并将手机音量调整至适中。</text>
+            </view>
+            <view class="instruction-item">
+                <text class="list-dot">•</text>
+                <text class="p">请在安静的环境下进行测试，以确保结果的准确性。</text>
+            </view>
+            <view class="instruction-item">
+                <text class="list-dot">•</text>
+                <text class="p">测试过程中，您将听到不同频率和大小的声音。</text>
+            </view>
+        </view>
+    </view>
+
+    <view class="card explanation-card">
+        <text class="h3 card-title-main">测试说明</text>
+        <text class="p explanation-text">本测试旨在提供一个初步的听力情况参考，并非专业医疗诊断。</text>
+        <text class="p explanation-text">您将依次听到一系列声音，请在听到声音后，尽快点击“我听到了”按钮。</text>
+        <view class="important-notice">
+            <image class="notice-icon" src="/assets/svgs/icon-info.svg" mode="aspectFit"/>
+            <text class="p text-sm text-accent notice-text">重要提示：此测试结果不能替代专业的听力学评估。如对听力有任何疑虑，请咨询医生或专业听力师。</text>
+        </view>
+    </view>
+
+    <button class="btn btn-primary btn-full-width btn-start-test" bindtap="startTest">开始测试</button>
+</view>

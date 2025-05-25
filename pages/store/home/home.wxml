@@ -1,0 +1,70 @@
+<!-- pages/store/home/home.wxml -->
+<view class="container store-home-container">
+    <!-- 顶部：标题和购物车图标 -->
+    <view class="header-bar">
+        <text class="h1 page-main-title">文创商城</text>
+        <image class="cart-icon" src="/assets/images/icon-cart.png" mode="aspectFit" bindtap="navigateToCart"/>
+    </view>
+
+    <!-- 搜索框 -->
+    <view class="search-bar-wrapper">
+        <view class="search-input-group">
+            <image class="search-icon-input" src="/assets/images/icon-search.png" mode="aspectFit"/>
+            <input class="search-input" type="text" placeholder="搜索商品/手语元素..." confirm-type="search" bindconfirm="onSearchConfirm"/>
+        </view>
+    </view>
+
+    <!-- 商品分类 -->
+    <view class="category-section">
+        <text class="h3 section-title">商品分类</text>
+        <scroll-view scroll-x="true" class="filter-chips-scroll" show-scrollbar="false">
+            <view class="filter-chips">
+                <text wx:for="{{categories}}" wx:key="id"
+                      class="chip {{currentCategoryId === item.id ? 'active' : ''}}"
+                      bindtap="onCategoryTap" data-id="{{item.id}}">
+                    {{item.name}}
+                </text>
+            </view>
+        </scroll-view>
+    </view>
+
+    <!-- 热门推荐 -->
+    <view class="products-section">
+        <text class="h3 section-title">热门推荐</text>
+        <view class="products-grid">
+            <view class="card product-card" wx:for="{{hotProducts}}" wx:key="id" bindtap="navigateToProductDetail" data-id="{{item.id}}">
+                <view class="product-image-placeholder">
+                    <image wx:if="{{item.imageUrl}}" class="product-image" src="{{item.imageUrl}}" mode="aspectFill"/>
+                    <text wx:else>图片待补充</text>
+                </view>
+                <view class="product-card-content">
+                    <text class="p product-name">{{item.name}}</text>
+                    <view class="product-price-line">
+                        <text class="price product-price">{{item.priceFormatted || ('¥ ' + item.price)}}</text>
+                        <text wx:if="{{item.pointsPrice}}" class="text-sm text-accent product-points-price">或 {{item.pointsPrice}} 积分</text>
+                    </view>
+                </view>
+            </view>
+        </view>
+        <view wx:if="{{hotProducts.length === 0 && !isLoadingProducts}}" class="empty-products">
+            <text>暂无推荐商品</text>
+        </view>
+    </view>
+
+    <!-- 积分兑换专区 -->
+    <view class="points-exchange-section">
+        <text class="h3 section-title">积分兑换专区</text>
+        <view class="card points-item-card" wx:for="{{pointsExchangeItems}}" wx:key="id">
+            <view class="points-item-info">
+                <text class="p text-dark font-bold item-name">{{item.name}}</text>
+                <!-- <image wx:if="{{item.iconUrl}}" class="item-icon" src="{{item.iconUrl}}"/> -->
+            </view>
+            <button class="btn btn-primary btn-sm btn-exchange" bindtap="exchangeWithPoints" data-id="{{item.id}}">
+                {{item.pointsRequired}}积分兑换
+            </button>
+        </view>
+         <view wx:if="{{pointsExchangeItems.length === 0 && !isLoadingPointsItems}}" class="empty-products">
+            <text>暂无积分兑换商品</text>
+        </view>
+    </view>
+</view>

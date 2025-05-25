@@ -1,0 +1,108 @@
+/* pages/learner/dailyChallenge/dailyChallenge.wxss */
+/* 引入或复用全局变量和样式 */
+page { /* ... 与 home.wxss 中 page 类似的变量定义 ... */ }
+.challenge-container { /* ... 与 home.wxss 中 .container 类似 ... */
+    padding: 40rpx;
+    text-align: center; /* 标题居中 */
+}
+
+.page-title { /* h2 */
+    display: block;
+    margin-bottom: 40rpx;
+    color: var(--text-color-dark);
+    font-size: 44rpx;
+    font-weight: 600;
+}
+
+.challenge-card { /* card */
+    background: var(--card-bg);
+    border-radius: var(--border-radius-lg);
+    padding: 30rpx;
+    margin-bottom: 30rpx;
+    box-shadow: var(--shadow-glass);
+    text-align: center; /* 卡片内文字居中 */
+}
+.challenge-card .instruction-text { /* p */
+    margin-bottom: 20rpx;
+    font-size: 28rpx;
+    color: var(--text-color-light);
+}
+
+.video-placeholder {
+    width: 100%;
+    min-height: 400rpx; /* UI稿 min-height: 200px */
+    background-color: var(--placeholder-bg);
+    border-radius: var(--border-radius-md);
+    display: flex;
+    flex-direction: column; /* 图标和文字垂直排列 */
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 40rpx; /* UI稿 mb-20 */
+    color: var(--placeholder-text);
+}
+.video-placeholder .play-icon {
+    width: 80rpx; /* UI稿 40px */
+    height: 80rpx;
+    margin-bottom: 20rpx;
+}
+.video-placeholder .placeholder-text {
+    font-size: 28rpx; /* UI稿 14px */
+}
+
+.options-group {
+    display: flex;
+    flex-direction: column;
+    gap: 20rpx; /* 小程序部分版本支持gap，不支持则用margin */
+}
+.options-group .btn-option { /* btn, btn-secondary */
+    width: 100%; /* 按钮撑满卡片宽度 */
+    margin-bottom: 20rpx; /* 如果gap不支持 */
+    padding: 24rpx 30rpx; /* 调整内边距让文字不拥挤 */
+    font-size: 30rpx;
+    background-color: var(--form-bg); /* 选项按钮用form背景色 */
+    color: var(--text-color-dark);
+    border: 1rpx solid #eee; /* 给个浅色边框 */
+    text-align: left; /* 选项文字左对齐 */
+}
+.options-group .btn-option:last-child {
+    margin-bottom: 0;
+}
+.options-group .btn-option.active { /* btn-secondary.active */
+    background-color: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+}
+
+.btn-confirm { /* btn, btn-primary */
+    width: 100%;
+    margin-top: 40rpx; /* UI稿 mt-20 */
+    background-color: var(--accent-color);
+    color: white;
+    font-size: 32rpx;
+    padding: 24rpx 0;
+}
+.btn-confirm[disabled] {
+    background-color: #ccc;
+    opacity: 0.7;
+}
+
+.progress-info-card { /* card */
+    background: var(--card-bg);
+    border-radius: var(--border-radius-lg);
+    padding: 30rpx;
+    box-shadow: var(--shadow-glass);
+}
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.progress-info-card .progress-text { /* text-dark */
+    font-size: 28rpx;
+    color: var(--text-color-dark);
+}
+.progress-info-card .hint-text { /* text-accent */
+    font-size: 28rpx;
+    color: var(--accent-color);
+    cursor: pointer; /* 小程序中cursor无效，但语义上可保留 */
+}

@@ -1,0 +1,93 @@
+<!-- pages/profile/user-growth/user-growth.wxml -->
+<view class="page-container">
+  <!-- 用户信息卡片 -->
+  <view class="user-info-card glass-card-base" style="background: linear-gradient(135deg, rgba(255, 140, 0, 0.8), rgba(255, 183, 94, 0.6)); padding: 40rpx;">
+    <view class="flex-row items-center">
+      <!-- Avatar Placeholder -->
+      <view class="avatar avatar-lg flex-shrink-0" style="margin-right: 30rpx;">
+        <!-- 确认这里是 userInfo.avatarUrl -->
+        <image class="avatar-image" src="{{userInfo.avatarUrl}}" mode="aspectFill" />
+      </view>
+      <view class="flex-col flex-1">
+        <view class="flex-row items-center mb-5">
+          <!-- 确认这里是 userInfo.name -->
+          <text class="user-name text-white text-xl font-bold">{{userInfo.name}}</text>
+          <!-- 星星图标之间的间距可以通过margin-left在WXSS中为 .star-icon 设置 -->
+          <image class="star-icon" src="/assets/svgs/icon-star.svg" style="width: 32rpx; height: 32rpx; margin-left: 10rpx;"></image>
+          <image class="star-icon" src="/assets/svgs/icon-star.svg" style="width: 32rpx; height: 32rpx; margin-left: 5rpx;"></image>
+        </view>
+        <!-- 确认这里是 userInfo.volunteerTitle 和 userInfo.level -->
+        <text class="user-meta text-sm" style="color: rgba(255,255,255,0.9);">{{userInfo.volunteerTitle}} | 学习等级 {{userInfo.level}}</text>
+        <view class="flex-row mt-10"> <!-- 如果这里面只有一个tag，不需要flex的gap -->
+          <!-- 确认这里是 userInfo.points -->
+          <view class="tag user-points-tag">可用积分: {{userInfo.points}}</view>
+          <!-- 如果有多个tag，可以给第二个及以后的tag设置margin-left -->
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 我的任务 -->
+  <view class="module-card glass-card-base">
+    <h3 class="module-title text-dark font-bold mb-10">我的任务</h3>
+    <block wx:for="{{tasks}}" wx:key="id">
+      <view class="task-item-container">
+        <view class="task-item flex-between items-center mb-10">
+          <text class="task-name text-dark">{{item.name}} ({{item.current}}/{{item.target}})</text>
+          <view class="tag {{item.status === 'completed' ? 'task-status-completed' : ''}}">
+            {{item.status === 'completed' ? '已完成' : (item.status === 'pending' ? '去做任务' : '进行中')}}
+          </view>
+        </view>
+        <view class="progress-bar mb-10">
+          <view class="progress-bar-inner" style="width: {{item.progress}}">
+          </view>
+        </view>
+        <button
+  wx:if="{{item.status === 'pending'}}"
+  class="btn-go-task btn-primary-base btn-sm-base"
+  style="padding: 8rpx 20rpx; font-size: 24rpx; margin-top: -10rpx; margin-bottom: 10rpx;"
+  data-taskid="{{item.id}}"
+  bindtap="goToTask"
+>去做任务</button>
+      </view>
+    </block>
+    <view class="text-right mt-10" bindtap="viewAllTasks">
+      <text class="text-accent text-sm link-text">查看全部任务 ></text>
+    </view>
+  </view>
+
+  <!-- 我的勋章墙 -->
+  <view class="module-card glass-card-base">
+    <h3 class="module-title text-dark font-bold mb-10">我的勋章墙</h3>
+    <view class="badge-wall flex-row flex-wrap">
+      <block wx:for="{{badges}}" wx:key="id">
+        <view class="badge-icon {{item.acquired ? '' : 'inactive'}}" title="{{item.name}}" style="margin: 10rpx;"> <!-- 使用 margin 代替 gap -->
+          <image src="{{item.icon}}" class="badge-svg"></image>
+        </view>
+      </block>
+    </view>
+    <view class="text-right mt-10" bindtap="viewAllBadges">
+      <text class="text-accent text-sm link-text">查看全部勋章 ></text>
+    </view>
+  </view>
+
+  <!-- 常用功能 -->
+  <view class="module-card glass-card-base">
+    <h3 class="module-title text-dark font-bold mb-10">常用功能</h3>
+    <block wx:for="{{commonFunctions}}" wx:key="id" wx:for-item="funcItem" wx:for-index="funcIndex">
+      <view class="function-item-wrapper" bindtap="handleFunctionTap" data-page="{{funcItem.page}}" data-funcname="{{funcItem.name}}">
+        <view class="function-item flex-between items-center p-10" hover-class="item-hover">
+          <view class="function-text-container flex-row items-center" style="margin-right: 10rpx;"> <!-- 左侧内容容器，和箭头留间距 -->
+            <image wx:if="{{funcItem.icon}}" src="{{funcItem.icon}}" class="function-icon" style="margin-right: 20rpx;"></image> <!-- 图标和文字间距 -->
+            <text class="function-name text-dark font-bold">{{funcItem.name}}</text>
+          </view>
+          <image class="arrow-icon" src="/assets/svgs/icon-chevron-right.svg"></image>
+        </view>
+      </view>
+      <view wx:if="{{funcIndex < commonFunctions.length - 1}}" class="hr-line-inset"></view>
+    </block>
+  </view>
+
+  <!-- 底部留白，避免被 tabBar 遮挡 -->
+  <view style="height: 120rpx;"></view>
+</view>

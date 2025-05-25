@@ -1,0 +1,223 @@
+/* pages/volunteer/activityDetails/activityDetails.wxss */
+
+/* 确保这些变量在 page 或 app.wxss 中定义 */
+page {
+  --bg-color: #F8F4F0;
+  --text-color-dark: #333333;
+  --text-color-light: #666666;
+  --accent-color: #FF8C00;
+  --card-bg: rgba(255, 255, 255, 0.6);
+  --form-bg: rgba(255, 255, 255, 0.8); /* UI稿 form-bg */
+  --placeholder-bg: #E0E0E0;
+  --placeholder-text: #999999;
+  --font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+  --border-radius-sm: 16rpx;  /* 8px */
+  --border-radius-md: 24rpx;  /* 12px */
+  --border-radius-lg: 32rpx;  /* 16px */
+  --shadow-soft: 0 8rpx 30rpx rgba(0, 0, 0, 0.05);
+  --shadow-glass: 0 16rpx 64rpx 0 rgba(31, 38, 135, 0.1);
+}
+
+/* 确保全局 box-sizing */
+view, text, input, textarea, button, image {
+  box-sizing: border-box;
+}
+
+.page-container {
+  background-color: #F8F4F0; /* 页面整体背景色，模拟UI稿 */
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom)); /* 为底部固定按钮栏留出足够空间 */
+  min-height: 100vh;
+  font-family: var(--font-family);
+}
+
+.hero-image-wrapper {
+  width: 100%;
+  height: 400rpx; /* UI稿 200px (原2.0.html为200px，Screen4中看起来更高一些) */
+  /* border-radius: 0;  Screen4中顶部图片是直角，且占满宽度 */
+  overflow: hidden; /* 如果图片mode为aspectFill，确保多余部分被裁剪 */
+}
+.hero-image {
+  width: 100%;
+  height: 100%;
+}
+.hero-image-placeholder {
+  width: 100%;
+  height: 400rpx;
+  background-color: var(--placeholder-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--placeholder-text);
+  font-size: 28rpx;
+}
+
+.content-wrapper {
+  padding: 0 40rpx; /* 页面主要内容区的左右内边距，对应UI稿20px */
+}
+
+.activity-main-title { /* h1, UI稿 h2 22px */
+  display: block;
+  font-size: 44rpx;
+  font-weight: 600;
+  color: var(--text-color-dark);
+  padding-top: 30rpx; /* 标题与顶部图片的间距 */
+  margin-bottom: 20rpx; /* 标题与下方第一个卡片的间距，对应UI稿mb-10 */
+}
+
+/* --- Card Styles (通用) --- */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--border-radius-lg);
+  padding: 30rpx; /* UI稿 15px */
+  margin-bottom: 30rpx; /* UI稿 mb-15 */
+  box-shadow: var(--shadow-glass);
+  border: 1rpx solid rgba(255, 255, 255, 0.18); /* 玻璃拟态边框 */
+  width: 100%; /* 卡片撑满 content-wrapper */
+}
+.card:last-child { /* 最后一个卡片，调整底部外边距 */
+  margin-bottom: 0; 
+}
+
+
+/* 卡片内标题 */
+.card-section-title { /* h3, UI稿 18px */
+  display: block;
+  font-size: 36rpx;
+  font-weight: 600;
+  color: var(--text-color-dark);
+  margin-bottom: 20rpx; /* UI稿 mb-10 */
+}
+.card-sub-title { /* h4, UI稿 字体比p大一点，加粗 */
+  display: block;
+  font-size: 30rpx; /* 约15px */
+  font-weight: 500; /* medium */
+  color: var(--text-color-dark);
+  margin-top: 30rpx; /* UI稿 mt-10 */
+  margin-bottom: 10rpx; /* UI稿 mb-5 */
+}
+
+/* --- Info Summary Card --- */
+.info-summary-card .info-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx; /* UI稿 mb-10 */
+}
+.info-summary-card .info-item:last-child {
+  margin-bottom: 0;
+}
+.info-summary-card .info-icon {
+  width: 40rpx; /* UI稿 20px */
+  height: 40rpx;
+  margin-right: 16rpx; /* UI稿 gap-10 (这里用8px=16rpx) */
+  /* fill: var(--accent-color); SVG fill, PNG不需要 */
+}
+.info-summary-card .info-label {
+  font-size: 28rpx; /* UI稿 14px */
+  color: var(--text-color-dark);
+  font-weight: 600; /* UI稿 font-bold */
+  margin-right: 10rpx;
+  flex-shrink: 0; /* 防止标签被压缩 */
+}
+.info-summary-card .info-value {
+  font-size: 28rpx; /* UI稿 14px */
+  color: var(--text-color-light);
+  word-break: break-all; /* 防止长文本溢出 */
+}
+
+/* --- Details Content Card --- */
+.details-content-card .description-text { /* p */
+  font-size: 28rpx; /* UI稿 14px */
+  line-height: 1.7;
+  color: var(--text-color-light);
+}
+.requirements-list .requirement-item {
+  display: flex; /* 实现圆点和文字的对齐 */
+  margin-bottom: 10rpx; /* UI稿 li margin-bottom: 5px */
+}
+.requirements-list .list-dot {
+  margin-right: 12rpx; /* 圆点和文字的间距 */
+  color: var(--text-color-light);
+  line-height: 1.6; /* 与 p 标签行高对齐 */
+}
+.requirements-list .p {
+  font-size: 28rpx; /* UI稿 14px */
+  line-height: 1.6;
+  color: var(--text-color-light);
+}
+
+
+/* --- Signup Form Card --- */
+.signup-form-card .form-group {
+  margin-bottom: 30rpx; /* UI稿 mb-15 */
+}
+.signup-form-card .form-group:last-child {
+  margin-bottom: 0;
+}
+.signup-form-card .form-label {
+  display: block;
+  font-size: 28rpx; /* UI稿 14px */
+  color: var(--text-color-dark);
+  margin-bottom: 16rpx; /* UI稿 mb-8 */
+  font-weight: 500; /* UI稿 */
+}
+.input-field, .textarea-field {
+  width: 100%;
+  padding: 24rpx 30rpx; /* UI稿 12px 15px */
+  border: none;
+  border-radius: var(--border-radius-md);
+  background-color: var(--form-bg);
+  font-size: 28rpx; /* UI稿 14px */
+  color: var(--text-color-dark);
+  box-shadow: inset 0 2rpx 6rpx rgba(0,0,0,0.05); /* UI稿 inset shadow */
+}
+/* input placeholder 颜色 (可选) */
+.input-field::placeholder, .textarea-field::placeholder {
+  color: var(--placeholder-text, #999);
+  font-size: 28rpx;
+  line-height: normal;
+}
+.textarea-field {
+  min-height: 100rpx; /* 约等于 rows="2" (UI稿)，auto-height会自适应 */
+  line-height: 1.6; /* 保证文字行距舒适 */
+}
+
+/* --- Bottom Action Bar --- */
+.bottom-action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20rpx 40rpx; /* UI稿 padding: 15px 20px */
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom)); /* 适配iPhoneX等 */
+  background: var(--card-bg); /* UI稿 card-bg (毛玻璃效果) */
+  border-top: 1rpx solid rgba(0,0,0,0.05); /* UI稿 */
+  box-shadow: 0 -10rpx 30rpx rgba(0,0,0,0.05); /* 向上阴影，比UI稿略明显一点 */
+  z-index: 100;
+}
+.btn-primary { /* 全局或在此处定义 */
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+}
+.btn-full-width { /* 通用按钮样式 */
+  width: 100%;
+  display: block;
+  padding-top: 24rpx; /* UI稿 12px */
+  padding-bottom: 24rpx;
+  font-size: 32rpx; /* UI稿 16px */
+  font-weight: 500; /* UI稿 */
+  border-radius: var(--border-radius-md); /* UI稿 */
+  text-align: center;
+  line-height: 1.5;
+}
+.btn-submit-signup[disabled] {
+  background-color: #E0E0E0; /* 禁用时颜色变灰 */
+  color: #999999;
+  opacity: 1; /* 覆盖默认的 disabled 透明度，通过颜色区分 */
+  box-shadow: none; /* 移除阴影 */
+}
+.btn-submit-signup text { /* 按钮内的小字 "(需 xx 积分)" */
+  font-size: 24rpx; /* 比按钮主文字小一点 */
+  opacity: 0.9;
+  margin-left: 10rpx;
+}

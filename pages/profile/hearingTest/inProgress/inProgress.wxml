@@ -1,0 +1,18 @@
+<!-- pages/profile/hearingTest/inProgress/inProgress.wxml -->
+<view class="container test-in-progress-page">
+    <text class="h1 page-main-title">听力测试中...</text>
+    <text class="p progress-indicator">测试进度: <text class="text-accent font-bold">{{currentTestNumber}} / {{totalTests}}</text></text>
+    <text class="p instruction-text">请仔细聆听，听到声音后请点击下方按钮。</text>
+
+    <view class="card sound-area-card">
+        <view class="sound-wave-placeholder">
+            <!-- 实际应用中，这里可能需要一个动画或状态指示器来表示声音正在“播放” -->
+            <image class="sound-icon" src="/assets/svgs/icon-sound-wave.svg" mode="aspectFit"/>
+            <text class="placeholder-text">{{isPlayingSound ? '正在播放声音...' : '准备播放声音...'}}</text>
+        </view>
+        <text class="p text-sm text-center test-info-text">当前测试: {{currentEar}} / {{currentFrequency}} Hz</text>
+    </view>
+
+    <button class="btn btn-primary btn-full-width btn-heard" bindtap="userHeardSound" disabled="{{!canRespond}}">我听到了</button>
+    <button class="btn btn-secondary btn-full-width btn-not-heard" bindtap="userDidNotHearSound" disabled="{{!canRespond}}">没有听到 / 跳过</button>
+</view>

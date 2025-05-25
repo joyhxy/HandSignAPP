@@ -1,0 +1,59 @@
+{
+  "pages": [
+    "pages/profile/user-growth/user-growth" 
+    ,"pages/learner/home/home"
+    ,"pages/volunteer/activityList/activityList"
+    ,"pages/store/home/home"
+    ,"pages/learner/dailyChallenge/dailyChallenge"
+    ,"pages/learner/gestureDetails/gestureDetails"
+    ,"pages/volunteer/activityDetails/activityDetails"
+    ,"pages/profile/myActivities/myActivities"
+    ,"pages/store/productDetails/productDetails"
+    ,"pages/store/cart/cart"
+    ,"pages/store/checkout/checkout"
+    ,"pages/profile/leaderboard/leaderboard" 
+    ,"pages/profile/hearingTest/instructions/instructions"
+    ,"pages/profile/hearingTest/inProgress/inProgress"
+    ,"pages/profile/hearingTest/results/results"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#F8F4F0", 
+    "navigationBarTitleText": "手语学习",
+    "navigationBarTextStyle": "black"
+  },
+  "tabBar": {
+    "color": "#666666", 
+    "selectedColor": "#FF8C00", 
+    "backgroundColor": "rgba(248, 244, 240, 0.8)", 
+    "borderStyle": "black", 
+    "list": [
+      {
+        "pagePath": "pages/learner/home/home", 
+        "text": "学习",
+        "iconPath": "assets/images/tab_learn_normal.png", 
+        "selectedIconPath": "assets/images/tab_learn_active.png" 
+      },
+      {
+        "pagePath": "pages/volunteer/activityList/activityList", 
+        "text": "实践",
+        "iconPath": "assets/images/tab_volunteer_normal.png",
+        "selectedIconPath": "assets/images/tab_volunteer_active.png"
+      },
+      {
+        "pagePath": "pages/store/home/home",
+        "text": "商城",
+        "iconPath": "assets/images/tab_store_normal.png",
+        "selectedIconPath": "assets/images/tab_store_active.png"
+      },
+      {
+        "pagePath": "pages/profile/user-growth/user-growth", 
+        "text": "我的",
+        "iconPath": "assets/images/tab_profile_normal.png",
+        "selectedIconPath": "assets/images/tab_profile_active.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

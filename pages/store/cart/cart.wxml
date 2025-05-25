@@ -1,0 +1,60 @@
+<!-- pages/store/cart/cart.wxml -->
+<view class="container cart-page-container">
+    <!-- 修改点：将标题移到列表外部，并添加 class -->
+    <view class="page-header-bar">
+        <text class="h1 page-main-title">购物车</text>
+        <!-- 可以考虑在这里放一个“编辑”或“清空购物车”的按钮，如果设计需要 -->
+    </view>
+
+    <block wx:if="{{cartItems.length > 0}}">
+        <scroll-view scroll-y="true" class="cart-items-scroll-area">
+            <view class="cart-items-list">
+                <view class="card cart-item-card" wx:for="{{cartItems}}" wx:key="id">
+                    <image class="item-image" src="{{item.imageUrl || '/assets/images/product-placeholder-small.png'}}" mode="aspectFill"/>
+                    <view class="item-details">
+                        <text class="p text-dark font-bold item-name">{{item.name}}</text>
+                        <text class="p text-sm item-specs" wx:if="{{item.specs}}">{{item.specs}}</text>
+                        <view class="item-price-quantity-row">
+                            <block wx:if="{{item.type === 'points'}}">
+                                <text class="price item-price text-accent">{{item.pointsPrice}} 积分</text>
+                            </block>
+                            <block wx:else>
+                                <text class="price item-price">{{item.priceFormatted || ('¥ ' + item.price.toFixed(2))}}</text>
+                            </block>
+                            <view class="quantity-control">
+                              <view class="quantity-btn-circle" bindtap="decreaseQuantity" data-id="{{item.id}}"
+                                data-disabled="{{item.quantity <= 1}}"
+                                style="{{item.quantity <= 1 ? 'opacity:0.5; pointer-events:none;' : ''}}">－</view>
+                              <text class="quantity-text-display">{{item.quantity}}</text>
+                              <view class="quantity-btn-circle" bindtap="increaseQuantity" data-id="{{item.id}}">＋</view>
+                            </view>
+                        </view>
+                    </view>
+                    <!-- 删除按钮可以放在卡片右上角，或者像UI稿那样在数量控制旁边或通过左滑出现 -->
+                    <!-- 这里我们先简化，保持在右侧 -->
+                    <view class="delete-item-wrapper" bindtap="deleteCartItem" data-id="{{item.id}}">
+                        <image class="delete-icon" src="/assets/images/icon-delete-grey.png" mode="aspectFit"/>
+                    </view>
+                </view>
+            </view>
+        </scroll-view>
+    </block>
+    <view wx:else class="empty-cart-placeholder">
+        <image class="empty-cart-icon" src="/assets/images/icon-cart-empty.png" mode="aspectFit"/>
+        <text class="p">购物车还是空的哦~</text>
+        <button class="btn btn-primary btn-go-shopping" bindtap="goShopping">去逛逛</button>
+    </view>
+
+    <!-- 底部合计与结算栏 -->
+    <view class="bottom-summary-bar" wx:if="{{cartItems.length > 0}}">
+        <view class="summary-text-group">
+            <text class="text-dark total-label">合计:</text>
+            <text class="price total-amount-price">{{totalPriceFormatted || '¥ 0.00'}}</text>
+            <text wx:if="{{totalPoints > 0}}" class="text-accent font-bold total-points-value">+ {{totalPoints}} 积分</text>
+        </view>
+        <!-- 修改点：按钮样式类名和文本 -->
+        <button class="btn btn-confirm-checkout" bindtap="navigateToCheckout" disabled="{{cartItems.length === 0}}">
+            去结算 ({{totalItemsCount || 0}})
+        </button>
+    </view>
+</view>

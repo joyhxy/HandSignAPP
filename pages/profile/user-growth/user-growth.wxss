@@ -1,0 +1,178 @@
+/* pages/profile/user-growth/user-growth.wxss */
+.page-container {
+  padding: 20rpx; /* 页面整体内边距 */
+  background-color: #F8F4F0; /* 确保页面背景与 app.wxss 中的 page 一致或特定 */
+}
+
+/* 用户信息卡片 */
+.user-info-card {
+  /* 已经在 WXML 中通过 style 给了渐变背景和特定 padding, glass-card-base 提供了基础 */
+  margin-bottom: 30rpx;
+}
+.avatar {
+  width: 100rpx; /* 50px */
+  height: 100rpx;
+  border-radius: 50%;
+  background-color: #E0E0E0; /* --placeholder-bg */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999999; /* --placeholder-text */
+  font-size: 20rpx;
+  text-align: center;
+  overflow: hidden;
+  border: 4rpx solid white;
+  box-shadow: 0 4rpx 15rpx rgba(0, 0, 0, 0.05); /* --shadow-soft */
+}
+.avatar-lg {
+  width: 160rpx; /* 80px */
+  height: 160rpx;
+  font-size: 24rpx;
+}
+.avatar-image {
+  width: 100%;
+  height: 100%;
+}
+.user-name {
+  /* 已在wxml中通过class设置颜色和大小 */
+}
+.star-icon {
+  width: 32rpx;
+  height: 32rpx;
+  /* fill 属性对 image 里的 svg 无效，svg的颜色需要在svg文件内部定义，或者使用css filter，或者把svg当做背景图 */
+  /* 对于 image 标签加载的 svg，颜色由 svg 文件自身决定。 */
+  /* 如果想动态改颜色，考虑使用字体图标或js动态修改svg内容(较复杂) */
+}
+.user-meta {
+  /* 已在wxml中通过class设置颜色和大小 */
+}
+.tag {
+  display: inline-block;
+  background-color: rgba(255, 140, 0, 0.1); /* 默认 tag 背景 */
+  color: #FF8C00; /* --accent-color */
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx; /* --border-radius-sm */
+  font-size: 20rpx; /* 10px */
+  font-weight: 500;
+  margin-right: 10rpx;
+  margin-bottom: 10rpx;
+}
+.user-points-tag {
+  background: rgba(255,255,255,0.2);
+  color: white;
+}
+
+/* 通用模块卡片 */
+.module-card {
+  /* glass-card-base 提供了基础 */
+}
+.module-title {
+  font-size: 36rpx; /* 18px */
+  line-height: 1.4;
+  /* mb-10 已在wxml中设置 */
+}
+
+/* 我的任务 */
+.task-item {
+  /* flex-between items-center mb-10 已在wxml中设置 */
+}
+.task-name {
+  font-size: 28rpx; /* 14px */
+}
+.task-status-completed {
+  background-color: #dcfce7; /* 示例：已完成 tag 绿色 */
+  color: #16a34a;
+}
+.progress-bar {
+  height: 16rpx; /* 8px */
+  background-color: rgba(0,0,0,0.1);
+  border-radius: 8rpx;
+  overflow: hidden;
+  margin-top: 10rpx;
+}
+.progress-bar-inner {
+  height: 100%;
+  background-color: #FF8C00; /* --accent-color */
+  border-radius: 8rpx;
+  /* width 通过 style 设置 */
+  transition: width 1s ease-out;
+}
+.btn-go-task {
+  /* btn-primary-base btn-sm-base 已提供基础 */
+  /* style 中提供了特定 padding 和 font-size */
+  line-height: normal; /* button在小程序中有默认line-height */
+}
+.link-text {
+  cursor: pointer; /* 小程序中cursor无效，但语义上是链接 */
+}
+
+
+/* 我的勋章墙 */
+.badge-wall {
+  /* flex-row flex-wrap gap 已在wxml中设置 */
+}
+.badge-icon {
+  width: 100rpx; /* 约60px, 可调整 */
+  height: 100rpx;
+  background-color: #eee;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10rpx; /* 替代gap，因为gap可能在旧机型支持不好 */
+  box-shadow: 0 4rpx 15rpx rgba(0, 0, 0, 0.05); /* --shadow-soft */
+}
+.badge-icon .badge-svg {
+  width: 50rpx; /* svg图标大小 */
+  height: 50rpx;
+  /* fill: #FF8C00; */ /* 对于 image 加载的 svg，fill 需要在 svg 文件内定义 */
+}
+.badge-icon.inactive {
+  background-color: #f0f0f0;
+}
+.badge-icon.inactive .badge-svg {
+  /* fill: #bbb; */ /* 同上，需要在svg文件内定义灰色 */
+}
+
+
+/* 常用功能 */
+.function-item {
+  /* flex-between items-center p-10 已在wxml中设置 */
+  min-height: 80rpx;
+}
+.item-hover { /* 点击态效果 */
+  background-color: rgba(0,0,0,0.03);
+}
+.function-icon {
+  width: 40rpx;
+  height: 40rpx;
+  fill: #FF8C00; /* --accent-color */
+}
+.arrow-icon {
+  width: 36rpx;
+  height: 36rpx;
+  color: #666666;
+  /* 新增或修改以下属性 */
+  display: block; /* 确保 image 表现为块级元素，更容易控制垂直对齐 */
+  /* 尝试1: 如果父元素是flex布局且 align-items: center，这个可能不需要，但可以试试 */
+  /* vertical-align: middle; */ /* 对于inline-block或table-cell元素有效 */
+}
+
+/* 同时，确保其父容器 .function-item 是flex布局且垂直居中 */
+.function-item {
+  display: flex; /* 确保是flex布局 */
+  justify-content: space-between; /* 这个你已经有了 */
+  align-items: center; /* 确保垂直居中 */
+  padding: 20rpx; /* 调整这里的padding，确保左右两边内容有足够空间 */
+  min-height: 80rpx; /* 你已有的 */
+}
+
+/* 确保左侧内容容器也是垂直居中 */
+.function-item .flex-row.items-center { /* 指向包含图标和文字的那个view */
+    align-items: center; /* 确保这个也垂直居中 */
+}
+.hr-line-inset { /* 内部分割线 */
+  border: none;
+  border-top: 1rpx solid rgba(0,0,0,0.05);
+  margin: 0 20rpx; /* 卡片内边距是30rpx，左右各留10rpx，所以分割线左右20rpx */
+}

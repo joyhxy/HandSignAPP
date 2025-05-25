@@ -1,0 +1,83 @@
+<!-- pages/store/checkout/checkout.wxml -->
+<view class="container checkout-page-container">
+    <text class="h1 page-main-title">确认订单</text>
+
+    <!-- 收货地址卡片 -->
+    <view class="card address-card" bindtap="chooseAddress">
+        <block wx:if="{{selectedAddress.userName}}">
+            <view class="address-info">
+                <view class="user-contact">
+                    <text class="user-name text-dark font-bold">{{selectedAddress.userName}}</text>
+                    <text class="user-phone text-dark">{{selectedAddress.telNumber}}</text>
+                </view>
+                <text class="p address-detail">{{selectedAddress.provinceName}}{{selectedAddress.cityName}}{{selectedAddress.countyName}}{{selectedAddress.detailInfo}}</text>
+            </view>
+            <image class="arrow-icon" src="/assets/images/icon-chevron-right.png" mode="aspectFit"/>
+        </block>
+        <block wx:else>
+            <text class="p placeholder-text">请选择收货地址</text>
+            <image class="arrow-icon" src="/assets/images/icon-chevron-right.png" mode="aspectFit"/>
+        </block>
+    </view>
+
+    <!-- 商品清单卡片 -->
+    <view class="card order-items-card">
+        <text class="h3 card-section-title">商品信息</text>
+        <view class="order-item" wx:for="{{orderItems}}" wx:key="id">
+            <image class="item-image" src="{{item.imageUrl || '/assets/images/product-placeholder-small.png'}}" mode="aspectFill"/>
+            <view class="item-info">
+                <text class="p text-dark item-name">{{item.name}}</text>
+                <text class="p text-sm item-specs" wx:if="{{item.specs}}">{{item.specs}}</text>
+            </view>
+            <view class="item-price-qty">
+                <block wx:if="{{item.type === 'points'}}">
+                    <text class="p text-accent">{{item.pointsPrice}} 积分</text>
+                </block>
+                <block wx:else>
+                    <text class="p text-dark price-num">{{item.priceFormatted || ('¥' + item.price.toFixed(2))}}</text>
+                </block>
+                <text class="p text-sm quantity-tag">x {{item.quantity}}</text>
+            </view>
+        </view>
+    </view>
+
+    <!-- 订单金额信息卡片 (简化) -->
+    <view class="card order-summary-card">
+        <view class="summary-row">
+            <text class="p text-dark">商品总额</text>
+            <text class="p text-dark">{{summary.itemsPriceFormatted || '¥0.00'}}</text>
+        </view>
+        <view class="summary-row" wx:if="{{summary.totalPoints > 0}}">
+            <text class="p text-dark">积分小计</text>
+            <text class="p text-accent">{{summary.totalPoints}} 积分</text>
+        </view>
+        <view class="summary-row">
+            <text class="p text-dark">运费</text>
+            <text class="p text-dark">{{summary.shippingFeeFormatted || '¥0.00'}}</text>
+        </view>
+        <!-- <view class="summary-row">
+            <text class="p text-dark">优惠</text>
+            <text class="p text-accent">- {{summary.discountFormatted || '¥0.00'}}</text>
+        </view> -->
+        <view class="summary-row total-payable-row">
+            <text class="p text-dark font-bold">应付总额</text>
+            <text class="p text-accent font-bold final-amount">{{summary.finalAmountFormatted || '¥0.00'}}</text>
+        </view>
+         <view class="summary-row total-payable-row" wx:if="{{summary.finalPoints > 0}}">
+            <text class="p text-dark font-bold">应付积分</text>
+            <text class="p text-accent font-bold final-amount">{{summary.finalPoints}} 积分</text>
+        </view>
+    </view>
+
+    <!-- 底部提交订单栏 -->
+    <view class="bottom-submit-bar">
+        <view class="final-amount-display">
+            <text class="text-dark">实付款:</text>
+            <text class="price final-payable-amount">{{summary.finalAmountFormatted || '¥0.00'}}</text>
+             <text wx:if="{{summary.finalPoints > 0}}" class="text-accent font-bold final-payable-points">+ {{summary.finalPoints}} 积分</text>
+        </view>
+        <button class="btn btn-submit-order" bindtap="submitOrder" disabled="{{!selectedAddress.userName || orderItems.length === 0 || isSubmitting}}">
+            提交订单
+        </button>
+    </view>
+</view>

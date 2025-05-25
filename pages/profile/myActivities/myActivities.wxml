@@ -1,0 +1,73 @@
+<!-- pages/profile/myActivities/myActivities.wxml -->
+<view class="container my-activities-page-container">
+    <text class="h1 page-main-title">我的活动</text>
+
+    <!-- 进行中的活动 -->
+    <block wx:if="{{ongoingActivities.length > 0}}">
+        <view class="card activity-item-card ongoing-card" wx:for="{{ongoingActivities}}" wx:key="id">
+            <text class="h3 activity-card-title">{{item.title}}</text>
+            <view class="activity-meta-info">
+                <view class="meta-line">
+                    <image class="meta-icon" src="/assets/images/icon-location.png" mode="aspectFit"/>
+                    <text class="text-sm meta-text">{{item.location}}</text>
+                </view>
+                <view class="meta-line">
+                    <image class="meta-icon" src="/assets/images/icon-calendar.png" mode="aspectFit"/>
+                    <text class="text-sm meta-text">{{item.dateTime}}</text>
+                </view>
+            </view>
+            <view class="status-tag-container">
+                <text class="tag status-tag status-ongoing-blue">{{item.statusText || '进行中'}}</text>
+            </view>
+            <button class="btn btn-primary btn-full-width btn-action" bindtap="checkIn" data-id="{{item.id}}" disabled="{{item.cannotCheckIn}}">
+                <image wx:if="{{!item.cannotCheckIn}}" class="btn-icon-left" src="/assets/images/icon-gps.png" mode="aspectFit"/>
+                {{item.checkInButtonText || 'GPS签到 (距离 50m)'}}
+            </button>
+            <text wx:if="{{item.checkInHint}}" class="p text-sm text-center action-hint">{{item.checkInHint}}</text>
+        </view>
+    </block>
+
+    <!-- 已完成/待反馈的活动 -->
+    <block wx:if="{{completedActivities.length > 0}}">
+        <view class="card activity-item-card completed-card" wx:for="{{completedActivities}}" wx:key="id">
+            <text class="h3 activity-card-title">{{item.title}}</text>
+            <view class="activity-meta-info">
+                <view class="meta-line">
+                    <image class="meta-icon" src="/assets/images/icon-location.png" mode="aspectFit"/>
+                    <text class="text-sm meta-text">{{item.location}}</text>
+                </view>
+                <view class="meta-line">
+                    <image class="meta-icon" src="/assets/images/icon-calendar.png" mode="aspectFit"/>
+                    <text class="text-sm meta-text">{{item.dateTime}}</text>
+                </view>
+            </view>
+            <view class="status-tag-container">
+                 <text class="tag status-tag status-completed-green">{{item.statusText || '已完成'}}</text>
+            </view>
+            <button class="btn btn-secondary btn-full-width btn-action" bindtap="fillFeedback" data-id="{{item.id}}">
+                填写反馈问卷
+            </button>
+            <text wx:if="{{item.feedbackHint}}" class="p text-sm text-center action-hint">{{item.feedbackHint}}</text>
+        </view>
+    </block>
+
+    <!-- 历史活动 -->
+    <view class="card history-log-card" wx:if="{{historicalActivities.length > 0}}">
+        <text class="h3 card-list-title">历史活动</text>
+        <view class="history-log-list">
+            <view wx:for="{{historicalActivities}}" wx:key="id" class="history-log-item">
+                <view class="log-item-main">
+                    <text class="text-dark log-title">{{item.title}}</text>
+                </view>
+                <view class="log-item-aside">
+                    <text class="text-sm log-date">{{item.date}}</text>
+                    <text class="text-accent log-points" wx:if="{{item.points > 0}}">+{{item.points}}积分</text>
+                </view>
+            </view>
+        </view>
+    </view>
+    
+    <view wx:if="{{ongoingActivities.length === 0 && completedActivities.length === 0 && historicalActivities.length === 0 && !isLoading}}" class="empty-placeholder">
+        <text class="p">您还没有参与任何活动哦~</text>
+    </view>
+</view>

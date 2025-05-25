@@ -1,0 +1,198 @@
+/* pages/store/cart/cart.wxss */
+/* --- 全局变量和基础样式 --- */
+page {
+  --bg-color: #F8F4F0;
+  --text-color-dark: #333333;
+  --text-color-light: #666666;
+  --accent-color: #FF8C00;
+  --card-bg: white; /* 购物车卡片背景通常是纯白，而不是半透明 */
+  --form-bg: rgba(255, 255, 255, 0.8);
+  --placeholder-bg: #E0E0E0;
+  --placeholder-text: #999999;
+  --font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+  --border-radius-sm: 16rpx;
+  --border-radius-md: 24rpx;
+  --border-radius-lg: 32rpx; /* UI稿卡片圆角较大 */
+  --shadow-soft: 0 8rpx 30rpx rgba(0, 0, 0, 0.05); /* 柔和阴影 */
+  /* --shadow-glass: 0 16rpx 64rpx 0 rgba(31, 38, 135, 0.1); */ /* 购物车卡片阴影可能更柔和 */
+}
+view, text, button, image, scroll-view { box-sizing: border-box; }
+
+.cart-page-container {
+  display: flex; /* 使用flex布局让滚动区域和底部栏能正确分配空间 */
+  flex-direction: column;
+  height: 100vh; /* 撑满整个屏幕 */
+  background-color: #F8F4F0; /* 页面背景 */
+  font-family: var(--font-family);
+}
+
+.page-header-bar {
+  padding: 30rpx 40rpx 0; /* 标题的上和左右内边距 */
+  width: 100%;
+  flex-shrink: 0; /* 防止被压缩 */
+}
+.page-main-title { /* h1 */
+  display: block;
+  font-size: 48rpx; /* UI稿 购物车标题较大 */
+  font-weight: 600;
+  color: var(--text-color-dark);
+  margin-bottom: 30rpx; /* 标题与列表的间距，对应UI稿20px左右 */
+  text-align: left; /* 确保标题在左侧 */
+}
+
+.cart-items-scroll-area {
+  flex-grow: 1; /* 占据剩余垂直空间 */
+  overflow-y: auto; /* 允许内容滚动 */
+  padding: 0 40rpx; /* 列表区域的左右内边距 */
+  /* background-color: lightcyan; */ /* 调试用 */
+}
+.cart-items-list {
+  /*  */
+}
+
+.card.cart-item-card { /* 修改点：卡片样式 */
+  background: var(--card-bg);
+  border-radius: var(--border-radius-lg); /* UI稿圆角 */
+  padding: 30rpx; /* UI稿内边距约15px */
+  margin-bottom: 30rpx; /* UI稿卡片间距约15px */
+  box-shadow: var(--shadow-soft); /* 使用柔和阴影 */
+  border: none; /* 移除之前的玻璃拟态边框 */
+  display: flex;
+  align-items: flex-start;
+  gap: 24rpx; /* 图片与详情的间距，约12px */
+}
+.cart-item-card:last-child {
+  margin-bottom: 0; /* 列表最后一个卡片无下外边距 */
+}
+
+.item-image { /* 修改点：图片尺寸和占位 */
+  width: 160rpx; /* UI稿图片约 80px */
+  height: 160rpx;
+  min-width: 160rpx;
+  background-color: var(--placeholder-bg);
+  border-radius: var(--border-radius-sm); /* 图片圆角 */
+  overflow: hidden;
+}
+
+.item-details {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+.item-name {
+  font-size: 28rpx; color: var(--text-color-dark); font-weight: 600;
+  margin-bottom: 8rpx;
+  line-height: 1.4; /* 允许多行时行距舒适 */
+  /* 两行打点 */
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; text-overflow: ellipsis; white-space: normal;
+}
+.item-specs {
+  font-size: 24rpx; color: var(--text-color-light);
+  margin-bottom: auto; /* **修改点：让规格和价格数量行上下撑开** */
+  padding-bottom: 16rpx; /* 给价格行留出一些空间 */
+}
+.item-price-quantity-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10rpx; /* 确保与上方内容有间距 */
+}
+.item-price {
+  font-size: 30rpx; /* UI稿价格字体略大 */
+  font-weight: 500;
+  color: var(--text-color-dark); /* 普通价格用深色 */
+}
+.item-price.text-accent { /* 积分价格 */
+  color: var(--accent-color);
+  font-weight: bold;
+}
+
+/* --- 数量控制 - 极简小圆圈方案 --- */
+.quantity-control {
+  display: flex;
+  align-items: center;
+}
+
+.quantity-btn-circle {
+  width: 48rpx;  /* 目标：小圆圈直径约 24px */
+  height: 48rpx;
+  border-radius: 50%; /* 圆形 */
+  background-color: #f0f0f0; /* 浅灰色背景 */
+  color: #333333; /* 符号颜色 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx; /* 符号大小 */
+  line-height: 1; /* 移除默认行高影响，让flex居中生效 */
+  text-align: center;
+  /* pointer-events: auto; */ /* 确保可以点击，除非被style覆盖 */
+}
+
+.quantity-text-display {
+  font-size: 28rpx;
+  color: var(--text-color-dark);
+  font-weight: 500;
+  margin: 0 24rpx; /* 数字与按钮的间距 */
+  min-width: 30rpx;
+  text-align: center;
+}
+/* --- 数量控制结束 --- */
+
+.delete-item-wrapper { /* 删除图标容器 */
+  width: 56rpx; height: 56rpx; /* 与数量按钮同高，方便对齐 */
+  flex-shrink: 0;
+  margin-left: 10rpx;
+  display: flex; align-items: center; justify-content: center;
+  /* background-color: lightpink; */ /* 调试 */
+}
+.delete-icon { /* 删除图标本身 */
+  width: 36rpx; /* UI稿删除图标较小 */
+  height: 36rpx;
+  opacity: 0.4;
+}
+
+/* Empty Cart Placeholder */
+.empty-cart-placeholder { /* 保持不变或微调 */ }
+.btn-go-shopping { /* 保持不变或微调 */ }
+
+/* Bottom Summary Bar */
+.bottom-summary-bar {
+  position: fixed; /* 固定在底部 */
+  bottom: 0; left: 0; right: 0;
+  height: 120rpx;
+  padding: 0 40rpx;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: white; /* UI稿底部栏是白色背景 */
+  border-top: 1rpx solid #f0f0f0; /* 浅灰色上边框 */
+  display: flex; justify-content: space-between; align-items: center;
+  z-index: 100;
+  flex-shrink: 0; /* 防止被压缩 */
+}
+.summary-text-group { display: flex; align-items: baseline; }
+.total-label { /* “合计:” */
+  font-size: 28rpx; color: var(--text-color-dark);
+  margin-right: 10rpx;
+}
+.total-amount-price { /* 总价金额 */
+  font-size: 36rpx; font-weight: bold; color: var(--accent-color);
+}
+.total-points-value { /* 总积分 */
+  font-size: 28rpx; color: var(--accent-color); font-weight: 600;
+  margin-left: 10rpx;
+}
+.btn-confirm-checkout { /* 修改点：“去结算”按钮样式 */
+  padding: 0 50rpx; /* 按钮左右padding */
+  height: 80rpx;
+  line-height: 80rpx;
+  font-size: 30rpx;
+  font-weight: 500;
+  background-color: var(--accent-color); /* UI稿橙色背景 */
+  color: white;
+  border-radius: 40rpx; /* UI稿按钮是全圆角 */
+  border: none;
+  box-shadow: 0 4rpx 10rpx rgba(255, 140, 0, 0.3); /* 按钮轻微投影 */
+}
+.btn-confirm-checkout[disabled] {
+  background-color: #ccc; box-shadow: none;
+}

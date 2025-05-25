@@ -1,0 +1,201 @@
+/* pages/profile/myActivities/myActivities.wxss */
+/* --- 全局变量和基础样式 (假设已在app.wxss或page的:root中定义) --- */
+page {
+  --bg-color: #F8F4F0;
+  --text-color-dark: #333333;
+  --text-color-light: #666666;
+  --accent-color: #FF8C00; /* 主题橙色 */
+  --blue-accent: #0ea5e9; /* UI稿中“进行中”的蓝色 */
+  --green-accent: #16a34a; /* UI稿中“已完成”的绿色 */
+  --card-bg: rgba(255, 255, 255, 0.6);
+  --font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+  --border-radius-sm: 16rpx;
+  --border-radius-md: 24rpx;
+  --border-radius-lg: 32rpx;
+  --shadow-glass: 0 16rpx 64rpx 0 rgba(31, 38, 135, 0.1);
+}
+view, text, button, image { box-sizing: border-box; }
+
+.my-activities-page-container {
+  padding: 40rpx; /* 页面左右内边距 */
+  padding-top: 20rpx; /* 页面顶部内边距，标题与导航栏间距 */
+  background-color: #F8F4F0; /* 整体页面背景 */
+  min-height: 100vh;
+  font-family: var(--font-family);
+}
+
+.page-main-title { /* h1, UI稿中实际是h2的样式 */
+  display: block;
+  font-size: 44rpx; /* 22px */
+  font-weight: 600;
+  color: var(--text-color-dark);
+  margin-bottom: 40rpx; /* 标题与第一个卡片的间距，对应UI稿mb-20 */
+}
+
+/* --- 通用卡片样式 --- */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--border-radius-lg);
+  padding: 30rpx; /* UI稿15px */
+  margin-bottom: 30rpx; /* UI稿mb-15 */
+  box-shadow: var(--shadow-glass);
+  border: 1rpx solid rgba(255, 255, 255, 0.18);
+  width: 100%;
+}
+
+/* --- 活动状态卡片 (.activity-item-card) --- */
+.activity-card-title { /* h3 */
+  font-size: 36rpx; /* UI稿18px */
+  font-weight: 600;
+  color: var(--text-color-dark);
+  margin-bottom: 10rpx; /* 与meta信息间距，对应UI稿mb-5 (h3到p) */
+}
+
+.activity-meta-info {
+  margin-bottom: 20rpx; /* 与状态标签间距，对应UI稿mb-10 (meta到tag) */
+}
+.activity-meta-info .meta-line {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10rpx; /* 每行meta之间的间距 */
+}
+.activity-meta-info .meta-line:last-child {
+  margin-bottom: 0;
+}
+.meta-icon {
+  width: 28rpx; /* UI稿14px */
+  height: 28rpx;
+  margin-right: 10rpx; /* UI稿gap-5 */
+  flex-shrink: 0; /* 防止图标被压缩 */
+}
+.meta-text { /* text-sm */
+  font-size: 24rpx; /* UI稿12px */
+  color: var(--text-color-light);
+  line-height: 1.5; /* 确保文字不拥挤 */
+}
+
+.status-tag-container {
+  margin-bottom: 30rpx; /* 标签与下方按钮间距，对应UI稿中按钮的mt-15/mt-20 */
+}
+.tag.status-tag { /* 通用tag样式 */
+  display: inline-block;
+  padding: 6rpx 16rpx; /* UI稿 3px 8px */
+  border-radius: var(--border-radius-sm);
+  font-size: 20rpx; /* UI稿 10px */
+  font-weight: 500;
+}
+.status-ongoing-blue { /* UI稿中“进行中”的蓝色tag */
+  background-color: #e0f2fe; /* light blue */
+  color: var(--blue-accent);
+}
+.status-completed-green { /* UI稿中“已完成”的绿色tag */
+  background-color: #dcfce7; /* light green */
+  color: var(--green-accent);
+}
+
+/* --- 按钮样式 --- */
+.btn { /* 通用按钮基础，移除特定背景和颜色 */
+  width: 100%;
+  display: flex; /* 改为flex以支持图标和文字居中 */
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx 0; /* 调整按钮上下padding，UI稿中按钮高度较大 */
+  font-size: 30rpx; /* UI稿中按钮文字约15-16px */
+  font-weight: 500;
+  border-radius: var(--border-radius-md);
+  line-height: 1.5; /* 确保文字垂直居中 */
+  border: none;
+}
+.btn-primary { /* 主按钮，橙色 */
+  background-color: var(--accent-color);
+  color: white;
+  box-shadow: var(--shadow-soft); /* UI稿按钮有轻微阴影 */
+}
+.btn-secondary { /* 次按钮，白色背景橙色字 */
+  background-color: var(--card-bg); /* 或白色 #FFFFFF */
+  color: var(--accent-color);
+  border: 1rpx solid rgba(255, 140, 0, 0.3); /* UI稿橙色边框 */
+  box-shadow: var(--shadow-soft);
+}
+.btn-full-width { /* 这个类可能不再需要，因为 .btn 已设 width: 100% */
+  /* width: 100%; */
+}
+.btn-action { /* 卡片内的操作按钮 */
+  /* 继承 .btn 样式 */
+}
+.btn-icon-left {
+  width: 40rpx; /* UI稿GPS图标20px */
+  height: 40rpx;
+  margin-right: 10rpx; /* 图标与文字间距 */
+}
+.btn[disabled] {
+  background-color: #E0E0E0; /* 禁用时灰色背景 */
+  color: #AAAAAA;      /* 禁用时灰色文字 */
+  box-shadow: none;
+  opacity: 1; /* 覆盖默认的 disabled 透明度 */
+}
+.action-hint { /* p text-sm text-center mt-10 */
+  display: block;
+  text-align: center;
+  margin-top: 20rpx; /* UI稿 mt-10 */
+  font-size: 24rpx;
+  color: var(--text-color-light);
+}
+
+/* --- 历史活动卡片 (.history-log-card) --- */
+.history-log-card .card-list-title { /* h3 */
+  /* 使用 .card-section-title 样式 */
+}
+.history-log-list {
+  /*  */
+}
+.history-log-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* 垂直居中对齐 */
+  padding: 24rpx 0; /* UI稿 p-10，但垂直方向间距似乎更大 */
+  border-bottom: 1rpx solid rgba(0,0,0,0.05); /* UI稿 hr */
+}
+.history-log-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0; /* 移除最后一个的底部padding */
+}
+.history-log-item:first-child {
+  /* padding-top: 0;  */ /* 如果card-list-title下方已有足够margin */
+}
+
+.log-item-main {
+  flex-grow: 1; /* 让主内容占据多余空间 */
+}
+.log-title { /* text-dark */
+  font-size: 28rpx; /* UI稿 14px */
+  color: var(--text-color-dark);
+}
+.log-item-aside {
+  display: flex;
+  flex-direction: column; /* 日期和积分垂直排列 */
+  align-items: flex-end; /* 右对齐 */
+  text-align: right;
+  flex-shrink: 0; /* 防止被压缩 */
+  margin-left: 20rpx; /* 与左侧标题的间距 */
+}
+.log-date { /* text-sm */
+  font-size: 24rpx; /* UI稿 12px */
+  color: var(--text-color-light);
+}
+.log-points { /* text-accent */
+  font-size: 26rpx; /* 比日期稍大或同等 */
+  color: var(--accent-color);
+  font-weight: 500; /* medium */
+  margin-top: 4rpx; /* 日期和积分的微小间距 */
+}
+
+/* --- 空状态 --- */
+.empty-placeholder {
+  text-align: center;
+  padding: 80rpx 0;
+}
+.empty-placeholder .p {
+  font-size: 28rpx;
+  color: var(--text-color-light);
+}

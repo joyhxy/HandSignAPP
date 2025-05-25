@@ -1,0 +1,231 @@
+/* pages/learner/home/home.wxss */
+
+/* 确保这个在 app.wxss 或此文件顶部已设置 */
+view, text, button, image {
+  box-sizing: border-box;
+}
+
+page {
+    --bg-color: #F8F4F0;
+    --text-color-dark: #333333;
+    --text-color-light: #666666;
+    --accent-color: #FF8C00;
+    --card-bg: rgba(255, 255, 255, 0.6);
+    --form-bg: rgba(255, 255, 255, 0.8);
+    --placeholder-bg: #E0E0E0;
+    --placeholder-text: #999999;
+    --font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+    --border-radius-sm: 16rpx;
+    --border-radius-md: 24rpx;
+    --border-radius-lg: 32rpx;
+    --shadow-soft: 0 8rpx 30rpx rgba(0, 0, 0, 0.05);
+    --shadow-glass: 0 16rpx 64rpx 0 rgba(31, 38, 135, 0.1);
+}
+
+.home-page-container { /* 最外层容器 */
+    background-color: #F8F4F0;
+    min-height: 100vh;
+    font-family: var(--font-family);
+    padding: 40rpx; /* 页面左右总内边距 */
+    width: 100%; /* 确保容器本身是满宽的 */
+}
+
+/* --- Typography --- */
+.h1 { font-size: 56rpx; line-height: 1.3; font-weight: 600; color: var(--text-color-dark); margin-bottom: 10rpx; }
+.h2 { font-size: 44rpx; line-height: 1.3; font-weight: 600; color: var(--text-color-dark); }
+.h3 { font-size: 36rpx; line-height: 1.4; font-weight: 600; color: var(--text-color-dark); margin-bottom: 10rpx; }
+.p  { font-size: 28rpx; line-height: 1.6; color: var(--text-color-light); }
+.text-sm { font-size: 24rpx; color: var(--text-color-light); }
+.text-dark { color: var(--text-color-dark); }
+.text-accent { color: var(--accent-color); }
+.font-bold { font-weight: 600; }
+
+/* --- Layout & Spacing --- */
+.greeting-section {
+    margin-bottom: 40rpx;
+}
+.greeting-section .p.sub-greeting {
+    margin-bottom: 0;
+}
+
+.section-title.h2 {
+    display: block;
+    width: 100%; /* 确保标题本身也撑满可用宽度 */
+    margin-top: 40rpx;
+    margin-bottom: 20rpx;
+}
+
+/* --- Card --- */
+.card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius-lg);
+    padding: 30rpx;
+    margin-bottom: 30rpx;
+    box-shadow: var(--shadow-glass);
+    border: 1rpx solid rgba(255, 255, 255, 0.18);
+    width: 100%; /* 关键：确保所有卡片都占据其父容器（即.home-page-container减去padding后的宽度）的100% */
+    display: block; /* 确保是块级表现 */
+}
+
+.daily-challenge-card {
+    background: linear-gradient(135deg, var(--accent-color), #FFB75E);
+    color: white;
+}
+.daily-challenge-card .h3,
+.daily-challenge-card .streak-text {
+    color: white;
+}
+.daily-challenge-card .card-description {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 30rpx;
+}
+
+/* --- Card Header (通用化) --- */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20rpx;
+}
+
+/* --- Buttons --- */
+.btn {
+    display: inline-block; /* 或者 block 如果希望按钮独占一行并撑满 */
+    padding: 24rpx 50rpx;
+    border-radius: var(--border-radius-md);
+    font-size: 32rpx;
+    font-weight: 500;
+    text-align: center;
+    box-shadow: var(--shadow-soft);
+    line-height: 1.5;
+    border: none; /* 移除默认边框 */
+}
+/* 卡片内的主要行动按钮，如果希望它不撑满，保持 inline-block */
+.btn-card-action {
+    /* 如果需要按钮在卡片内右对齐或居中，可以在父级使用flex或text-align */
+}
+
+.btn-secondary {
+    background-color: var(--card-bg);
+    color: var(--accent-color);
+    border: 1rpx solid rgba(255, 140, 0, 0.3);
+}
+.daily-challenge-card .btn-secondary { /* 特指每日挑战卡片内的按钮 */
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: 1rpx solid rgba(255,255,255,0.5);
+}
+.btn-sm {
+    padding: 16rpx 30rpx;
+    font-size: 28rpx;
+}
+.recommended-challenge-card .btn-sm {
+    margin-top: 20rpx;
+}
+
+
+/* --- Progress Card --- */
+.progress-card .study-hours {
+    /* styles already applied */
+}
+.line-chart-container {
+    width: 100%;
+}
+.placeholder-chart {
+    width: 100%;
+    height: 300rpx;
+    background-color: var(--placeholder-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--border-radius-md);
+}
+.placeholder-chart text {
+    color: var(--placeholder-text);
+    font-size: 28rpx;
+}
+.chart-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 20rpx;
+    color: var(--text-color-light);
+    padding: 0 10rpx;
+    margin-top: 10rpx;
+}
+
+/* --- Quick Access Card --- */
+.hr {
+    height: 1rpx;
+    background-color: rgba(0,0,0,0.05);
+    margin: 20rpx 0;
+}
+.quick-access-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20rpx 0; /* 调整这里，让文字和图标有上下padding */
+}
+.quick-access-item:active {
+    background-color: rgba(0,0,0,0.03);
+}
+.quick-access-item .item-content {
+    display: flex;
+    align-items: center;
+}
+.quick-access-item .item-icon {
+    width: 40rpx;
+    height: 40rpx;
+    margin-right: 20rpx;
+}
+.quick-access-item .item-arrow {
+    width: 36rpx;
+    height: 36rpx;
+}
+
+/* --- Recommended Challenge Card --- */
+.recommended-challenge-card .challenge-title {
+    display: block;
+    margin-bottom: 10rpx;
+}
+.recommended-challenge-card .challenge-description {
+    display: block;
+}
+
+/* 错误提示 */
+.error-message {
+    color: red;
+    padding: 20rpx;
+    text-align: center;
+    background-color: rgba(255,0,0,0.1);
+    border-radius: var(--border-radius-sm);
+    margin-bottom: 20rpx;
+    font-size: 26rpx;
+    width: 100%; /* 确保错误提示也撑满 */
+}
+
+.line-chart-container {
+  width: 100%;
+  height: 300rpx; /* 给图表一个固定的高度，对应UI稿的150px */
+  margin-top: 20rpx; /* 图表与上方文字的间距 */
+}
+
+/* ec-canvas 组件本身也需要设置宽高，通常它会充满其父容器，
+ 但有时也需要显式指定，或者确保其父容器 .line-chart-container 有明确尺寸 */
+#learn-progress-chart { /* 通过 ID 选择器为 ec-canvas 设置尺寸 */
+  width: 100%;
+  height: 100%;
+  display: block; /* 确保它表现为块级元素 */
+}
+
+.chart-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 20rpx;
+  color: var(--text-color-light);
+  padding: 0 10rpx;
+  margin-top: 10rpx;
+}
+.chart-labels text { /* 给每个标签一点空间，避免挤在一起 */
+  flex: 1;
+  text-align: center;
+}

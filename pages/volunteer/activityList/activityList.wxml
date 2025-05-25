@@ -1,0 +1,83 @@
+<!-- pages/volunteer/activityList/activityList.wxml -->
+<view class="container activity-list-page-container"> <!-- 修改了最外层容器类名 -->
+    <view class="header-section">
+        <text class="h2 page-main-title">公益实践</text> <!-- 修改了类名 -->
+        <view class="header-actions">
+            <image class="search-icon" src="/assets/images/icon-search.png" mode="aspectFit" bindtap="navigateToSearch"/>
+            <text class="my-activities-link text-sm text-accent" bindtap="navigateToMyActivities">我的活动</text>
+        </view>
+    </view>
+
+    <!-- 筛选标签 -->
+    <scroll-view scroll-x="true" class="filter-chips-scroll-view" show-scrollbar="false"> <!-- 修改了类名 -->
+        <view class="filter-chips-inner-container"> <!-- 修改了类名 -->
+            <text wx:for="{{filterTags}}" wx:key="id"
+                  class="chip {{currentFilterTagId === item.id ? 'active' : ''}}"
+                  bindtap="onFilterTagTap" data-id="{{item.id}}">
+                {{item.name}}
+            </text>
+        </view>
+    </scroll-view>
+
+    <!-- 活动列表 -->
+    <view class="activity-cards-list-section"> <!-- 修改了类名 -->
+        <block wx:if="{{activities.length > 0}}">
+            <!-- **** 活动卡片 **** -->
+            <view class="card activity-card-item" wx:for="{{activities}}" wx:key="id" bindtap="navigateToActivityDetail" data-id="{{item.id}}">
+                <view class="activity-image-placeholder">
+                    <image wx:if="{{item.imageUrl}}" class="activity-image" src="{{item.imageUrl}}" mode="aspectFill"/>
+                    <text wx:else>图片待补充</text>
+                </view>
+                <view class="activity-card-content">
+                    <text class="h3 activity-content-title">{{item.title}}</text> <!-- 修改了类名 -->
+                    <view class="activity-meta-info"> <!-- 修改了类名 -->
+                        <view class="meta-item">
+                            <image class="meta-icon" src="/assets/images/icon-location.png" mode="aspectFit"/>
+                            <text class="text-sm meta-text">{{item.location}}</text>
+                        </view>
+                        <view class="meta-item">
+                            <image class="meta-icon" src="/assets/images/icon-calendar.png" mode="aspectFit"/>
+                            <text class="text-sm meta-text">{{item.dateTime}}</text>
+                        </view>
+                    </view>
+                    <view class="activity-tags-container" wx:if="{{item.tags && item.tags.length > 0}}"> <!-- 修改了类名 -->
+                        <text class="tag" wx:for="{{item.tags}}" wx:key="*this" wx:for-item="tagItem">{{tagItem}}</text>
+                    </view>
+                    <text class="p activity-content-description">{{item.description}}</text> <!-- 修改了类名 -->
+                    <button class="btn btn-primary btn-sm btn-action-detail" catchtap="doNothingAndNavigate" data-id="{{item.id}}" disabled="{{item.status === '名额已满'}}"> <!-- 修改了catchtap方法和类名 -->
+                        {{item.status === '名额已满' ? '名额已满' : (item.status === '招募中' ? '查看详情' : '查看详情')}}
+                    </button>
+                </view>
+            </view>
+            <!-- **** 活动卡片结束 **** -->
+        </block>
+        <view wx:else class="empty-activities-placeholder"> <!-- 修改了类名 -->
+            <text>暂无相关活动</text>
+        </view>
+    </view>
+
+    <!-- 为你推荐 (可选，如果API提供) -->
+    <block wx:if="{{recommendedActivities && recommendedActivities.length > 0}}">
+        <text class="section-title h3 recommendation-title">为你推荐</text> <!-- 修改了类名 -->
+        <view class="card activity-card-item" wx:for="{{recommendedActivities}}" wx:key="id" bindtap="navigateToActivityDetail" data-id="{{item.id}}">
+            <view class="activity-image-placeholder">
+                <image wx:if="{{item.imageUrl}}" class="activity-image" src="{{item.imageUrl}}" mode="aspectFill"/>
+                <text wx:else>图片待补充</text>
+            </view>
+            <view class="activity-card-content">
+                <text class="h3 activity-content-title">{{item.title}}</text>
+                 <view class="activity-meta-info">
+                    <view class="meta-item">
+                        <image class="meta-icon" src="/assets/images/icon-location.png" mode="aspectFit"/>
+                        <text class="text-sm meta-text">{{item.location}}</text>
+                    </view>
+                    <view class="meta-item">
+                        <image class="meta-icon" src="/assets/images/icon-calendar.png" mode="aspectFit"/>
+                        <text class="text-sm meta-text">{{item.dateTime}}</text>
+                    </view>
+                </view>
+                <button class="btn btn-primary btn-sm btn-action-detail" catchtap="doNothingAndNavigate" data-id="{{item.id}}">立即报名</button> <!-- 修改了catchtap方法和类名 -->
+            </view>
+        </view>
+    </block>
+</view>

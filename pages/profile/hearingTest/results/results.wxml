@@ -1,0 +1,56 @@
+<!-- pages/profile/hearingTest/results/results.wxml -->
+<view class="container test-results-page">
+    <text class="h1 page-main-title">听力测试结果</text>
+
+    <view class="card summary-card">
+        <text class="h3 card-title-main">结果概要</text>
+        <text class="p summary-text">您在本次测试中，对于 <text class="text-accent font-bold">{{summary.totalTests}}</text> 个测试音，成功识别了 <text class="text-accent font-bold">{{summary.heardCount}}</text> 个。</text>
+        <view class="ear-summary-row" wx:if="{{summary.leftEar}}">
+            <text class="p">左耳:</text>
+            <text class="tag status-tag {{summary.leftEar.statusClass}}">{{summary.leftEar.heardCount}}/{{summary.leftEar.totalCount}} {{summary.leftEar.statusText}}</text>
+        </view>
+        <view class="ear-summary-row" wx:if="{{summary.rightEar}}">
+            <text class="p">右耳:</text>
+            <text class="tag status-tag {{summary.rightEar.statusClass}}">{{summary.rightEar.heardCount}}/{{summary.rightEar.totalCount}} {{summary.rightEar.statusText}}</text>
+        </view>
+        <text class="p overall-assessment-text">初步评估您的听力状况为：<text class="text-dark font-bold">{{summary.overallAssessment}}</text>。</text>
+    </view>
+
+    <view class="card detailed-report-card">
+        <text class="h3 card-title-main">详细报告 (示意)</text>
+        <view class="report-placeholder">
+            <!-- 这里可以放一个简化的图表占位，或者按频率显示识别情况 -->
+            <text>简易听力图表/频率识别情况 (待补充)</text>
+            <!-- 示例：
+            <view wx:for="{{detailedResultsByFrequency}}" wx:key="frequency">
+                <text>{{item.frequency}}Hz: {{item.leftHeard ? '左耳√' : '左耳×'}} | {{item.rightHeard ? '右耳√' : '右耳×'}}</text>
+            </view>
+            -->
+        </view>
+        <text class="p text-sm example-text" wx:if="{{summary.exampleFinding}}">{{summary.exampleFinding}}</text>
+    </view>
+
+    <view class="card advice-card">
+        <text class="h3 card-title-main">重要建议</text>
+        <view class="important-notice">
+            <image class="notice-icon" src="/assets/svgs/icon-info.svg" mode="aspectFit"/>
+            <text class="p text-sm text-accent notice-text">再次提醒：此测试结果仅供参考，不能替代专业医疗诊断。</text>
+        </view>
+        <text class="p advice-intro-text">如果您的测试结果显示可能存在听力下降，或您对自己的听力状况有任何担忧，强烈建议您：</text>
+        <view class="advice-list">
+            <view class="advice-item">
+                <text class="list-dot">•</text>
+                <text class="p">咨询专业的耳鼻喉科医生或听力师。</text>
+            </view>
+            <view class="advice-item">
+                <text class="list-dot">•</text>
+                <text class="p">进行一次全面的听力学评估。</text>
+            </view>
+        </view>
+    </view>
+
+    <view class="action-buttons-row">
+        <button class="btn btn-secondary btn-half-width" bindtap="retest">重新测试</button>
+        <button class="btn btn-primary btn-half-width" bindtap="completeTest">完成</button>
+    </view>
+</view>

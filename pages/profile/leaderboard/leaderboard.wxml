@@ -1,0 +1,47 @@
+<!-- pages/profile/leaderboard/leaderboard.wxml -->
+<view class="container leaderboard-page-container">
+    <text class="h1 page-main-title">光荣榜</text>
+
+    <!-- 筛选标签 -->
+    <scroll-view scroll-x="true" class="filter-chips-scroll" show-scrollbar="false">
+        <view class="filter-chips">
+            <text wx:for="{{leaderboardTypes}}" wx:key="id"
+                  class="chip {{currentBoardType === item.id ? 'active' : ''}}"
+                  bindtap="onBoardTypeTap" data-id="{{item.id}}">
+                {{item.name}}
+            </text>
+        </view>
+    </scroll-view>
+
+    <!-- 当前用户排名高亮 (如果数据中有) -->
+    <view class="card user-rank-highlight-card" wx:if="{{currentUserRank && currentUserRank.rank}}">
+        <view class="rank-item highlight">
+            <text class="rank-number highlight-rank"># {{currentUserRank.rank}}</text>
+            <image class="avatar user-avatar" src="{{currentUserRank.avatarUrl || '/assets/images/avatar_placeholder.png'}}" mode="aspectFill"/>
+            <text class="user-name text-dark font-bold">{{currentUserRank.name}} (你)</text>
+            <text class="score text-accent font-bold">{{currentUserRank.scoreFormatted || currentUserRank.score}} {{currentBoardUnit}}</text>
+        </view>
+    </view>
+
+    <!-- 排名列表 -->
+    <view class="leaderboard-list">
+        <view class="card rank-item-card" wx:for="{{leaderboardData}}" wx:key="userId"
+              class="card rank-item-card {{item.isCurrentUser ? 'current-user-entry' : ''}} {{index < 3 ? 'top-three top-' + (index+1) : ''}}">
+            <view class="rank-item">
+                <text class="rank-number {{index < 3 ? 'rank-medal' : ''}}">
+                    <block wx:if="{{index === 0}}"># 1 <text class="medal">🥇</text></block>
+                    <block wx:elif="{{index === 1}}"># 2 <text class="medal">🥈</text></block>
+                    <block wx:elif="{{index === 2}}"># 3 <text class="medal">🥉</text></block>
+                    <block wx:else># {{item.rank || (index + 1)}}</block>
+                </text>
+                <image class="avatar user-avatar" src="{{item.avatarUrl || '/assets/images/avatar_placeholder.png'}}" mode="aspectFill"/>
+                <text class="user-name text-dark {{index < 3 ? 'font-bold' : ''}}">{{item.name}}</text>
+                <text class="score text-dark {{index < 3 ? 'font-bold' : ''}}">{{item.scoreFormatted || item.score}} {{currentBoardUnit}}</text>
+            </view>
+        </view>
+    </view>
+
+    <view wx:if="{{leaderboardData.length === 0 && !isLoading}}" class="empty-leaderboard">
+        <text class="p">暂无排行数据</text>
+    </view>
+</view>

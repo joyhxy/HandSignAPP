@@ -1,0 +1,164 @@
+/* pages/learner/gestureDetails/gestureDetails.wxss */
+/* 引入或复用全局变量和样式 */
+page { /* ... 与 home.wxss 中 page 类似的变量定义 ... */ }
+.details-container { /* ... 与 home.wxss 中 .container 类似 ... */
+    padding: 40rpx;
+    padding-bottom: 160rpx; /* 为底部按钮留空间 */
+}
+
+/* 通用卡片标题 */
+.card-title { /* h3 */
+    display: block;
+    margin-bottom: 20rpx;
+    font-size: 36rpx;
+    font-weight: 600;
+    color: var(--text-color-dark);
+}
+
+.media-placeholder {
+    width: 100%;
+    min-height: 440rpx; /* UI稿 220px */
+    background-color: var(--placeholder-bg);
+    border-radius: var(--border-radius-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30rpx; /* UI稿 mb-20 */
+    color: var(--placeholder-text);
+    overflow: hidden; /* 确保图片圆角生效 */
+}
+.media-placeholder .gesture-image {
+    width: 100%;
+    height: 100%; /* 或者具体高度，取决于mode */
+}
+.media-placeholder .placeholder-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+.media-placeholder .play-icon {
+    width: 80rpx;
+    height: 80rpx;
+    margin-bottom: 10rpx;
+}
+
+.info-card { /* card */
+    /* ... card基本样式 ... */
+    margin-bottom: 30rpx;
+}
+.info-card .title-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline; /* 名字和翻译基线对齐 */
+    margin-bottom: 20rpx; /* UI稿 mb-10 */
+}
+.info-card .gesture-name { /* h1 */
+    font-size: 52rpx; /* UI稿 26px */
+    margin-bottom: 0;
+    color: var(--text-color-dark);
+}
+.info-card .gesture-translation { /* text-accent font-bold */
+    font-size: 28rpx;
+    color: var(--accent-color);
+    font-weight: 600;
+}
+.tags-section .tag {
+    display: inline-block;
+    background-color: rgba(255, 140, 0, 0.1);
+    color: var(--accent-color);
+    padding: 6rpx 16rpx; /* UI稿 3px 8px */
+    border-radius: var(--border-radius-sm);
+    font-size: 20rpx; /* UI稿 10px */
+    font-weight: 500;
+    margin-right: 10rpx;
+    margin-bottom: 10rpx;
+}
+
+.description-card, .usage-card, .confusing-gestures-card { /* card */
+    /* ... card基本样式 ... */
+    margin-bottom: 30rpx;
+}
+.description-card .description-step {
+    margin-bottom: 10rpx;
+}
+.description-card .description-step:last-child {
+    margin-bottom: 0;
+}
+
+.usage-list .usage-item {
+    display: flex;
+    margin-bottom: 10rpx;
+}
+.usage-list .list-dot {
+    margin-right: 10rpx;
+    color: var(--text-color-light);
+}
+.usage-list .p { /* 已有全局样式 */ }
+.dialogue-example {
+    margin-top: 20rpx;
+    padding-left: 20rpx; /* 缩进对话 */
+    border-left: 4rpx solid var(--accent-color-light, rgba(255,140,0,0.3));
+}
+.dialogue-example .dialogue-line {
+    margin-bottom: 5rpx;
+}
+
+
+.confusing-gestures-card .confusing-item {
+    display: flex;
+    align-items: flex-start; /* 顶部对齐 */
+    gap: 20rpx; /* 如果不支持，用margin */
+    margin-bottom: 20rpx;
+}
+.confusing-gestures-card .confusing-item:last-child {
+    margin-bottom: 0;
+}
+.confusing-media-placeholder {
+    width: 160rpx;  /* UI稿 80px */
+    height: 120rpx; /* UI稿 60px */
+    min-width: 160rpx; /* 防止被压缩 */
+    background-color: var(--placeholder-bg);
+    border-radius: var(--border-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20rpx; /* UI稿 10px */
+    color: var(--placeholder-text);
+    text-align: center;
+    overflow: hidden;
+}
+.confusing-media-placeholder image {
+    width: 100%;
+    height: 100%;
+}
+.confusing-gestures-card .confusing-description { /* p text-sm */
+    font-size: 24rpx;
+    color: var(--text-color-light);
+    line-height: 1.4; /* 调整行高让文字不拥挤 */
+}
+
+
+.action-buttons {
+    display: flex;
+    gap: 30rpx; /* UI稿 gap-15 (15px) */
+    margin-top: 40rpx; /* UI稿 mt-20 */
+    /* 如果要让按钮固定在底部，需要用 position: fixed 等，但这里是随内容滚动 */
+}
+.action-buttons .btn-half-width { /* btn btn-secondary/btn-primary */
+    flex: 1; /* 让两个按钮平分宽度 */
+    padding: 24rpx 0; /* 调整内边距 */
+    font-size: 30rpx;
+    text-align: center;
+}
+.action-buttons .btn-secondary {
+    background-color: var(--card-bg);
+    color: var(--accent-color);
+    border: 1rpx solid rgba(255, 140, 0, 0.3);
+}
+.action-buttons .btn-primary {
+    background-color: var(--accent-color);
+    color: white;
+}
