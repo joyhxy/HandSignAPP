@@ -1,0 +1,48 @@
+<!-- pages/profile/editProfile/editProfile.wxml -->
+<view class="container edit-profile-page">
+    <text class="h1 page-main-title">编辑个人资料</text>
+
+    <!-- 头像修改区域 -->
+    <view class="profile-item avatar-section" bindtap="chooseAvatar">
+        <text class="item-label">头像</text>
+        <view class="item-value-action">
+            <image class="avatar-preview" src="{{avatarUrl_local || userInfo.avatarUrl || '/assets/images/avatar_placeholder.png'}}" mode="aspectFill"/>
+            <image class="arrow-icon" src="/assets/svgs/icon-chevron-right.svg" mode="aspectFit"/>
+        </view>
+        <!-- 新的头像选择方式 -->
+        <!-- <button open-type="chooseAvatar" bindchooseavatar="onChooseAvatar" class="avatar-wrapper-btn">
+            <image class="avatar-preview" src="{{avatarUrl_local || userInfo.avatarUrl || '/assets/images/avatar_placeholder.png'}}" mode="aspectFill"/>
+        </button> -->
+    </view>
+    <view class="hr-line"></view>
+
+    <view class="profile-item">
+        <text class="item-label">昵称</text>
+        <view class="item-value-action nickname-input-wrapper">
+            <input class="nickname-input"
+                   type="text"  
+                   placeholder="请输入昵称"
+                   value="{{currentNickname_form}}"
+                   bindinput="onNicknameInputChange" />
+        </view>
+    </view>
+    <view class="hr-line"></view>
+
+    <!-- 其他可编辑信息，例如性别、生日、地区等 (根据你的API和设计) -->
+    <!--
+    <view class="profile-item" bindtap="selectGender">
+        <text class="item-label">性别</text>
+        <view class="item-value-action">
+            <text class="item-value">{{userInfo.genderText || '请选择'}}</text>
+            <image class="arrow-icon" src="/assets/svgs/icon-chevron-right.svg" mode="aspectFit"/>
+        </view>
+    </view>
+    <view class="hr-line"></view>
+    -->
+
+    <view class="save-button-wrapper">
+        <button class="btn btn-primary btn-save-profile" bindtap="saveProfileChanges" disabled="{{isSaving}}">
+            {{isSaving ? '保存中...' : '保 存'}}
+        </button>
+    </view>
+</view>

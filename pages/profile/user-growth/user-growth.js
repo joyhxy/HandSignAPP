@@ -1,256 +1,185 @@
 // pages/profile/user-growth/user-growth.js
-import request from '../../../utils/request.js'; // 确保request.js的相对路径正确
+import request from '../../../utils/request.js';
+const app = getApp();
 
 Page({
   data: {
-    // 初始化数据，WXML会先使用这些数据渲染，避免undefined错误
     userInfo: {
-      name: "加载中...",
-      level: "",
-      volunteerTitle: "",
+      name: "加载中...", // 初始状态
+      level: "LV.0",
+      volunteerTitle: "志愿者",
       points: 0,
-      avatarUrl: "/assets/images/avatar_placeholder.png", // 默认头像
-      // 更多字段可以根据API文档 user/info 来补充默认值
-      // id: null,
-      // username: '',
+      avatarUrl: "/assets/images/avatar_placeholder.png",
+      id: null, // 将由登录或硬编码的测试ID填充（用于任务接口）
+      username: '',
+      sign_in_days: 0
     },
-    tasks: [],    // 任务列表，初始为空
-    badges: [],   // 勋章列表，初始为空
-    commonFunctions: [ // 常用功能通常是静态的，或者很少变动
-      { id: 'fn001', name: "我的订单", icon: null, page: "/pages/profile/order-list/order-list" }, // 修改为实际页面路径
-      { id: 'fn002', name: "积分明细", icon: null, page: "/pages/profile/points-detail/points-detail" }, // 修改为实际页面路径
+    tasks: [], // 将从 /user/task 获取
+    badges: [], // 将使用模拟数据
+    commonFunctions: [
+      { id: 'fn001', name: "我的订单", icon: '/assets/svgs/icon-store.svg', page: "/pages/profile/myOrders/myOrders" },
+      { id: 'fn002', name: "积分明细", icon: '/assets/svgs/icon-star.svg', page: "/pages/profile/pointsDetails/pointsDetails" },
       { id: 'fn003', name: "在线听力测试", icon: "/assets/svgs/icon-headphones.svg", page: "/pages/profile/hearingTest/instructions/instructions" },
-      { id: 'fn004', name: "排行榜", icon: null, page: "/pages/profile/leaderboard/leaderboard" }, // 修改为实际页面路径
-      { id: 'fn005', name: "设置", icon: null, page: "/pages/profile/settings/settings" }, // 修改为实际页面路径
-    ]
+      { id: 'fn004', name: "排行榜", icon: '/assets/svgs/icon-trophy.svg', page: "/pages/profile/leaderboard/leaderboard" },
+      { id: 'fn005', name: "设置", icon: null, page: "/pages/profile/settings/settings" },
+    ],
+    isLoading: true, // 整体页面加载状态
+    isLoadingTasks: false // 单独为任务设置加载状态
   },
 
   onLoad: function (options) {
     console.log("user-growth.js onLoad: 页面加载");
-    // 优先加载模拟数据进行UI开发和测试
-    this.loadMockData();
+    this.setData({ isLoading: true, isLoadingTasks: true });
 
-    // 当准备好对接真实API时，再启用这些调用
-    // this.fetchUserProfile();
-    // this.fetchUserTasks();
-    // this.fetchUserBadges();
+    // ---- 硬编码一个测试用户ID，仅用于需要它的接口 (如 /user/task) ----
+    const TEST_USER_ID_FOR_API = 1;
+    // 假设登录后，用户的真实ID会被存到 this.data.userInfo.id
+    // 目前由于没有登录，我们先在data中给userInfo.id赋一个初始值，如果API需要
+    // 但 /user/task 明确需要 id 参数，所以直接传递
+    // this.setData({ 'userInfo.id': TEST_USER_ID_FOR_API }); // 如果其他地方也需要这个ID
+
+    // 加载模拟的用户信息和勋章数据
+    this.loadMockProfileData(TEST_USER_ID_FOR_API); // 传递ID以便模拟的用户信息能对应上
+
+    // 调用真实的任务接口
+    this.fetchUserTasks(TEST_USER_ID_FOR_API)
+      .finally(() => {
+        // 假设所有初始数据加载（模拟+真实）完成后，设置整体加载状态
+        // 注意：如果 loadMockProfileData 内部有异步，需要更复杂的 Promise 处理
+        // 为了简单，我们假设 loadMockProfileData 是同步的或很快完成
+        this.setData({ isLoading: false });
+        console.log("user-growth.js onLoad: 初始数据获取流程完成 (部分模拟, 部分API)");
+      });
   },
 
   onShow: function() {
-    // 每次页面显示时，如果需要，可以刷新TabBar的选中状态
-    // 这通常用于自定义TabBar，原生TabBar不需要手动设置selected
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-      this.getTabBar().setData({
-        selected: 3 // 假设“我的”是第4个tab (索引3)
-      })
+      this.getTabBar().setData({ selected: 3 });
     }
+    // 如果任务列表需要在每次显示时刷新，可以在这里调用
+    // if (this.data.userInfo.id && !this.data.isLoadingTasks) {
+    //   this.fetchUserTasks(this.data.userInfo.id);
+    // }
   },
 
-  // --- 模拟数据加载 ---
-  loadMockData: function() {
-    console.log("--- 开始执行 loadMockData ---"); // <--- 添加这个日志
+  // --- 新增：加载模拟的用户信息和勋章数据 ---
+  loadMockProfileData: function(userIdForMock) {
+    console.log("[loadMockProfileData] 开始加载模拟的用户信息和勋章");
 
-    // 1. 模拟用户信息 (对应 API文档的 /user/info)
-    const mockUserInfoFromApi = {
-      // 字段名严格按照API文档中 /user/info 成功响应的 "data" 部分
-      id: 'mockUser123',
-      username: 'mock_test_user',
-      nickname: "手语爱好者小明",
-      avatar: "/assets/images/avatar_placeholder.png", // 可以用一个在线图片测试
-      points: 2580,
-      // 假设API还会返回这些 (如果API文档有，就加上)
-      level: "LV.12",
-      volunteer_title: "四星志愿者",
-      sign_in_days: 30 // 连续签到天数
+    // 1. 模拟用户信息 (字段名尽量与 Apifox 中 /user/info 的 data 响应体一致)
+    const mockUserInfo = {
+      id: userIdForMock, // 使用传入的ID，保持一致性
+      username: `mock_user_${userIdForMock}`,
+      nickname: "手语爱好者 (模拟)",
+      avatar: "/assets/images/avatar_placeholder.png",
+      points: 1888,
+      level: "LV.8 (模拟)",
+      volunteer_title: "热心志愿者 (模拟)",
+      sign_in_days: 25
     };
-    console.log("模拟的用户信息 (mockUserInfoFromApi):", mockUserInfoFromApi); // <--- 添加这个日志
-    this.setData({
-      'userInfo.name': mockUserInfoFromApi.nickname,
-      'userInfo.avatarUrl': mockUserInfoFromApi.avatar,
-      'userInfo.points': mockUserInfoFromApi.points,
-      'userInfo.level': mockUserInfoFromApi.level,
-      'userInfo.volunteerTitle': mockUserInfoFromApi.volunteer_title,
-      // 如果还有其他字段在userInfo中，也从mockUserInfoFromApi获取并设置
-    });
+    this.setData({ userInfo: mockUserInfo });
+    console.log("[loadMockProfileData] 模拟用户信息已设置:", this.data.userInfo);
 
-    console.log("setData userInfo 完成. 当前 userInfo:", this.data.userInfo); // <--- 添加这个日志
-
-    // 2. 模拟任务列表 (假设API文档有一个 /user/tasks 返回任务列表)
-    // 假设后端返回的原始任务数据结构 (ITEMS是数组)
-    const mockTasksFromApi = {
-      ITEMS: [
-        { task_id: 't001', task_name: "完成每日手语词汇学习", current_progress: 1, target_progress: 1, status_code: 2, reward: 15 }, // status_code: 2-已完成
-        { task_id: 't002', task_name: "参与一次手语角志愿活动", current_progress: 0, target_progress: 1, status_code: 0, reward: 100 }, // status_code: 0-待领取/去做
-        { task_id: 't003', task_name: "观看5个手语教学视频", current_progress: 2, target_progress: 5, status_code: 1, reward: 25 } // status_code: 1-进行中
-      ]
-    };
-    // 将API数据格式化为WXML中期望的格式
-    const formattedTasks = (mockTasksFromApi.ITEMS || []).map(apiTask => {
-      let statusText = "进行中";
-      if (apiTask.status_code === 2) statusText = "completed"; // 与WXML中判断一致
-      else if (apiTask.status_code === 0) statusText = "pending";
-
-      return {
-        id: apiTask.task_id,
-        name: apiTask.task_name,
-        current: apiTask.current_progress,
-        target: apiTask.target_progress,
-        status: statusText, // 'completed', 'pending', 'in_progress' 等WXML中使用的状态
-        progress: apiTask.target_progress > 0 ? (apiTask.current_progress / apiTask.target_progress) * 100 : 0
-      };
-    });
-    this.setData({
-      tasks: formattedTasks
-    });
-
-    // 3. 模拟勋章列表 (假设API文档有一个 /user/badges)
-    const mockBadgesFromApi = {
-      ITEMS: [
-        { badge_id: 'b001', badge_name: "新手上路", icon_url: "/assets/svgs/icon-learn.svg", is_acquired: true },
-        { badge_id: 'b002', badge_name: "首次志愿", icon_url: "/assets/svgs/icon-volunteer-alt.svg", is_acquired: true },
-        { badge_id: 'b003', badge_name: "打卡达人", icon_url: "/assets/svgs/icon-check.svg", is_acquired: true },
-        { badge_id: 'b004', badge_name: "积分能手", icon_url: "/assets/svgs/icon-star.svg", is_acquired: false },
-        { badge_id: 'b005', badge_name: "手语翻译家", icon_url: "/assets/svgs/icon-trophy.svg", is_acquired: false },
-        { badge_id: 'b006', badge_name: "商城达人", icon_url: "/assets/svgs/icon-store.svg", is_acquired: false },
-      ]
-    };
-    const formattedBadges = (mockBadgesFromApi.ITEMS || []).map(apiBadge => ({
-      id: apiBadge.badge_id,
-      name: apiBadge.badge_name,
+    // 2. 模拟勋章列表 (字段名尽量与 Apifox 中 /user/badges 的 data 响应体一致)
+    const mockBadges = [
+      { id: 'b001', name: "新手上路 (模拟)", icon_url: "/assets/svgs/icon-learn.svg", is_acquired: true },
+      { id: 'b002', name: "首次志愿 (模拟)", icon_url: "/assets/svgs/icon-volunteer-alt.svg", is_acquired: true },
+      { id: 'b003', name: "打卡达人 (模拟)", icon_url: "/assets/svgs/icon-check.svg", is_acquired: true },
+      { id: 'b004', name: "积分能手 (模拟)", icon_url: "/assets/svgs/icon-star.svg", is_acquired: false },
+    ];
+    // 格式化为 WXML 期望的结构
+    const formattedBadges = mockBadges.map(apiBadge => ({
+      id: apiBadge.id,
+      name: apiBadge.name,
       icon: apiBadge.icon_url,
-      acquired: apiBadge.is_acquired
+      acquired: apiBadge.is_acquired === true
     }));
-    this.setData({
-      badges: formattedBadges
-    });
-
-    console.log("模拟数据加载完成. 当前data:", this.data);
+    this.setData({ badges: formattedBadges });
+    console.log("[loadMockProfileData] 模拟勋章列表已设置:", this.data.badges);
   },
+  // --- 模拟数据加载结束 ---
 
-  
 
-  // --- API 调用函数框架 (真实请求暂时注释) ---
-  fetchUserProfile: function() {
-    console.log("尝试调用 fetchUserProfile API");
-    /*
-    request({
-      url: '/user/info', // 参照API文档
-      method: 'GET'
-    })
-    .then(userData => { // userData 是 request.js resolve 出来的 data 部分
-      if (userData) {
-        console.log('API返回的用户信息:', userData);
-        this.setData({
-          'userInfo.name': userData.nickname || this.data.userInfo.name,
-          'userInfo.avatarUrl': userData.avatar || this.data.userInfo.avatarUrl,
-          'userInfo.points': userData.points !== undefined ? userData.points : this.data.userInfo.points,
-          'userInfo.level': userData.level || this.data.userInfo.level,
-          'userInfo.volunteerTitle': userData.volunteer_title || this.data.userInfo.volunteerTitle,
-        });
-      }
-    })
-    .catch(err => {
-      console.error('API获取用户信息失败:', err);
-      // wx.showToast({ title: err.msg || '用户信息加载失败', icon: 'none' });
-    });
-    */
-  },
+  // --- 真实API调用：只保留 fetchUserTasks ---
+  fetchUserTasks: function(userId) {
+    console.log(`[fetchUserTasks] 开始调用 API (GET /user/task) for user ID: ${userId}`);
+    this.setData({ isLoadingTasks: true }); // tasks: [] 已在 loadMockProfileData 或 data 中初始化
 
-  fetchUserTasks: function() {
-    console.log("尝试调用 fetchUserTasks API");
-    /*
-    // 假设API是 /user/tasks?status=all (你需要查阅API文档确认)
-    request({
-      url: '/user/tasks', // 参照API文档，可能需要参数如 /user/tasks?type=all
-      method: 'GET'
+    return request({ // 返回Promise
+      url: '/user/task',
+      method: 'GET',
+      data: { id: userId }
     })
-    .then(tasksData => { // tasksData 可能是 ITEMS 数组 (request.js 已处理 ITEMS)
-      if (tasksData && Array.isArray(tasksData)) {
-        const formattedTasks = tasksData.map(apiTask => {
-          // ... (与 mockTasksFromApi 的格式化逻辑类似)
-          // 确保字段名与API文档一致
+    .then(apiTaskArray => {
+      console.log('[fetchUserTasks] API /user/task 成功返回的业务数据 (apiTaskArray):', apiTaskArray);
+      if (Array.isArray(apiTaskArray)) {
+        const formattedTasks = apiTaskArray.map(apiTask => {
           let statusText = "进行中";
-          if (apiTask.status_code === 2) statusText = "completed";
-          else if (apiTask.status_code === 0) statusText = "pending";
+          let statusCodeForFrontend = 1;
+          if (apiTask.status_code === 2) { statusText = "已完成"; statusCodeForFrontend = 2; }
+          else if (apiTask.status_code === 0) { statusText = "待处理"; statusCodeForFrontend = 0; }
 
+          const progressPercent = (apiTask.max > 0 && apiTask.did !== undefined) // 使用 did 和 max
+                                ? Math.round((apiTask.did / apiTask.max) * 100)
+                                : 0;
           return {
-            id: apiTask.task_id,
-            name: apiTask.task_name,
-            current: apiTask.current_progress,
-            target: apiTask.target_progress,
+            id: apiTask.id,
+            name: apiTask.name,
+            current: apiTask.did || 0, // 使用 did
+            target: apiTask.max || 0,  // 使用 max
             status: statusText,
-            progress: apiTask.target_progress > 0 ? (apiTask.current_progress / apiTask.target_progress) * 100 : 0
+            status_code_frontend: statusCodeForFrontend,
+            progress: progressPercent + '%',
+            progressRaw: progressPercent,
           };
         });
+        console.log('[fetchUserTasks] 格式化后的任务列表 (formattedTasks):', formattedTasks);
         this.setData({ tasks: formattedTasks });
+      } else {
+        console.warn('[fetchUserTasks] API /user/task 返回的业务数据 (data字段) 不是一个数组:', apiTaskArray);
+        this.setData({ tasks: [] }); // 清空或用之前的模拟数据
       }
     })
     .catch(err => {
-      console.error('API获取任务列表失败:', err);
-    });
-    */
-  },
-
-  fetchUserBadges: function() {
-    console.log("尝试调用 fetchUserBadges API");
-    /*
-    request({
-      url: '/user/badges', // 参照API文档
-      method: 'GET'
+      console.error(`[fetchUserTasks] API /user/task 获取失败 for user ID ${userId}:`, err);
+      // 可以考虑在这里加载一次模拟任务数据作为降级
+      // this.loadMockTasksForFallback();
+      this.setData({ tasks: [] });
     })
-    .then(badgesData => { // badgesData 可能是 ITEMS 数组
-      if (badgesData && Array.isArray(badgesData)) {
-        const formattedBadges = badgesData.map(apiBadge => ({
-          // ... (与 mockBadgesFromApi 的格式化逻辑类似)
-          id: apiBadge.badge_id,
-          name: apiBadge.badge_name,
-          icon: apiBadge.icon_url,
-          acquired: apiBadge.is_acquired
-        }));
-        this.setData({ badges: formattedBadges });
-      }
-    })
-    .catch(err => {
-      console.error('API获取勋章列表失败:', err);
-    });
-    */
-  },
-
-  // --- 事件处理函数 ---
-  viewAllTasks: function() {
-    wx.navigateTo({
-      url: '/pages/profile/task-list/task-list', // 修改为实际页面路径
-       fail: () => { wx.showToast({ title: '页面未开放', icon: 'none'})}
+    .finally(() => {
+      this.setData({ isLoadingTasks: false });
+      console.log('[fetchUserTasks] API 调用完成');
     });
   },
 
+  // --- 移除了 fetchUserProfile 和 fetchUserBadges ---
+
+  // --- 事件处理函数 (保持不变) ---
+  viewAllTasks: function() { wx.navigateTo({ url: '/pages/profile/taskList/taskList', fail: () => wx.showToast({title:'功能建设中'})}); },
   viewAllBadges: function() {
     wx.navigateTo({
-      url: '/pages/profile/badge-wall/badge-wall', // 修改为实际页面路径
-       fail: () => { wx.showToast({ title: '页面未开放', icon: 'none'})}
+        url: '/pages/profile/badgeWall/badgeWall', // 修改为实际页面路径
+        fail: () => { wx.showToast({ title: '页面未开放', icon: 'none'})}
     });
-  },
-
+},
   handleFunctionTap: function(e) {
     const pagePath = e.currentTarget.dataset.page;
-    const funcName = e.currentTarget.dataset.funcname;
+    const funcName = e.currentTarget.dataset.funcname; // WXML中需要设置 data-funcname="{{funcItem.name}}"
     if (pagePath) {
       wx.navigateTo({
         url: pagePath,
         fail: (err) => {
-          console.error("Navigate failed:", pagePath, err);
-          wx.showToast({ title: '页面暂未开放', icon: 'none' });
+          console.error(`Navigate failed to ${pagePath}:`, err);
+          wx.showToast({ title: `页面 "${funcName}" 建设中`, icon: 'none' });
         }
       });
     } else {
-      wx.showToast({ title: `功能 "${funcName}" 暂未开放`, icon: 'none'});
+      wx.showToast({ title: `功能 "${funcName}" 配置错误`, icon: 'none'});
     }
   },
-
-  goToTask: function(e) { // 示例：处理 “去做任务” 按钮
-    const taskId = e.currentTarget.dataset.taskid; // WXML中需要给按钮加上 data-taskid="{{item.id}}"
+  goToTask: function(e) {
+    const taskId = e.currentTarget.dataset.taskid;
     console.log("点击了任务按钮，任务ID:", taskId);
-    // 根据任务ID跳转到对应页面或执行操作
-    wx.showToast({ title: `处理任务: ${taskId}`, icon: 'none' });
-  }
-})
+    wx.showToast({ title: `处理任务: ${taskId} (功能建设中)`, icon: 'none' });
+  },
+});

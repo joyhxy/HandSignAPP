@@ -1,0 +1,25 @@
+<!-- pages/profile/badgeWall/badgeWall.wxml -->
+<view class="container badge-wall-page">
+    <text class="h1 page-main-title">我的勋章墙</text>
+    <text class="p page-subtitle" wx:if="{{badges.length > 0}}">已点亮 {{acquiredCount}} / {{badges.length}} 枚勋章</text>
+
+    <view class="badges-grid" wx:if="{{badges.length > 0}}">
+        <view class="badge-item-card {{item.is_acquired ? 'acquired' : 'not-acquired'}}"
+              wx:for="{{badges}}" wx:key="id" bindtap="showBadgeDetail" data-badge="{{item}}">
+            <view class="badge-icon-wrapper">
+                <image class="badge-icon" src="{{item.imageUrl}}" mode="aspectFit"/>
+            </view>
+            <text class="badge-name {{item.is_acquired ? 'text-dark' : 'text-light-dim'}}">{{item.name}}</text>
+            <text class="badge-status text-sm {{item.is_acquired ? 'text-accent' : 'text-light-dim'}}">
+                {{item.is_acquired ? '已获得' : '未获得'}}
+            </text>
+        </view>
+    </view>
+
+    <view wx:if="{{badges.length === 0 && !isLoading}}" class="empty-state">
+        <text>暂无勋章信息，继续努力吧！</text>
+    </view>
+    <view wx:if="{{isLoading && badges.length === 0}}" class="loading-state">
+        <text>加载中...</text>
+    </view>
+</view>

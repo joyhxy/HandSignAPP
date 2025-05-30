@@ -28,11 +28,12 @@
         </scroll-view>
     </view>
 
-    <!-- 热门推荐 -->
+    <!-- 热门推荐 / 商品列表 -->
     <view class="products-section">
-        <text class="h3 section-title">热门推荐</text>
+        <!-- 修改点：直接使用 currentCategoryTitle -->
+        <text class="h3 section-title">{{currentCategoryTitle}}</text>
         <view class="products-grid">
-            <view class="card product-card" wx:for="{{hotProducts}}" wx:key="id" bindtap="navigateToProductDetail" data-id="{{item.id}}">
+            <view class="card product-card" wx:for="{{products}}" wx:key="id" bindtap="navigateToProductDetail" data-id="{{item.id}}">
                 <view class="product-image-placeholder">
                     <image wx:if="{{item.imageUrl}}" class="product-image" src="{{item.imageUrl}}" mode="aspectFill"/>
                     <text wx:else>图片待补充</text>
@@ -40,14 +41,18 @@
                 <view class="product-card-content">
                     <text class="p product-name">{{item.name}}</text>
                     <view class="product-price-line">
-                        <text class="price product-price">{{item.priceFormatted || ('¥ ' + item.price)}}</text>
+                        <text class="price product-price">{{item.priceFormatted}}</text>
                         <text wx:if="{{item.pointsPrice}}" class="text-sm text-accent product-points-price">或 {{item.pointsPrice}} 积分</text>
                     </view>
                 </view>
             </view>
         </view>
-        <view wx:if="{{hotProducts.length === 0 && !isLoadingProducts}}" class="empty-products">
-            <text>暂无推荐商品</text>
+        <view wx:if="{{products.length === 0 && !isLoadingProducts}}" class="empty-products">
+            <text>暂无商品</text>
+        </view>
+        <!-- "已经到底了"的提示，仅在非刷新且已无更多数据时显示 -->
+        <view wx:if="{{!isLoadingProducts && products.length > 0 && !hasMoreProducts && currentPage > 2}}" class="loading-more-finished">
+             <text>已经到底了哦~</text>
         </view>
     </view>
 
@@ -57,7 +62,6 @@
         <view class="card points-item-card" wx:for="{{pointsExchangeItems}}" wx:key="id">
             <view class="points-item-info">
                 <text class="p text-dark font-bold item-name">{{item.name}}</text>
-                <!-- <image wx:if="{{item.iconUrl}}" class="item-icon" src="{{item.iconUrl}}"/> -->
             </view>
             <button class="btn btn-primary btn-sm btn-exchange" bindtap="exchangeWithPoints" data-id="{{item.id}}">
                 {{item.pointsRequired}}积分兑换

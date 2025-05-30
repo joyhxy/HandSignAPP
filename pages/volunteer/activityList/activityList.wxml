@@ -4,7 +4,13 @@
         <text class="h2 page-main-title">公益实践</text> <!-- 修改了类名 -->
         <view class="header-actions">
             <image class="search-icon" src="/assets/images/icon-search.png" mode="aspectFit" bindtap="navigateToSearch"/>
-            <text class="my-activities-link text-sm text-accent" bindtap="navigateToMyActivities">我的活动</text>
+              <!-- “我的活动”链接一直显示 -->
+            <text class="header-link my-activities-link" bindtap="navigateToMyActivities">我的活动</text>
+            <!-- “发布活动”按钮也一直显示 -->
+            <button class="btn btn-publish-activity-header btn-sm" bindtap="navigateToPublishActivity">
+                <image class="btn-icon-prefix" src="/assets/svgs/icon-plus-circle.svg" mode="aspectFit"/>
+                发布
+            </button>
         </view>
     </view>
 

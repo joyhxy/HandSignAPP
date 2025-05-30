@@ -162,27 +162,21 @@ Page({ // <--- 唯一的 Page({...}) 开始
         });
     },
 
-    navigateToEncyclopedia: function() { // <--- 修改这个方法
-      console.log("Attempting to navigate to Gesture Details (from Encyclopedia)");
-      // 我们先硬编码一个手势ID来测试，比如 "thankyou"
-      // 对应 gestureDetails.js 中 fetchGestureDetails 模拟数据里的 ID
-      const gestureIdToTest = "thankyou"; // 或者用 mockGestureData 中的其他 id
-      // const gestureIdToTest = "notfound"; // 用这个测试找不到的情况
-
+    navigateToEncyclopedia: function() {
+      console.log("Navigating to Encyclopedia List Page");
       wx.navigateTo({
-          url: `/pages/learner/gestureDetails/gestureDetails?id=${gestureIdToTest}`,
+          url: '/pages/learner/encyclopedia/encyclopedia', // <--- 修改为手势百科列表页的路径
           success: function(res) {
-              console.log("Navigation to Gesture Details success:", res);
+              console.log("Navigation to Encyclopedia List SUCCESS");
           },
           fail: function(err) {
-              console.error("Navigation to Gesture Details fail:", err);
+              console.error("Navigation to Encyclopedia List FAIL:", err);
           }
       });
   },
-
     navigateToErrorReview: function() {
         wx.navigateTo({
-            url: '/pages/common/placeholder/placeholder?title=错题回顾'
+            url: '/pages/learner/wrongAnswers/wrongAnswers'
         });
     },
 

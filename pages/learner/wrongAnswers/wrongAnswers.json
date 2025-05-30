@@ -1,0 +1,6 @@
+{
+  "usingComponents": {},
+  "navigationBarTitleText": "错题回顾",
+  "enablePullDownRefresh": true,
+  "onReachBottomDistance": 50
+}

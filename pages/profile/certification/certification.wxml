@@ -1,0 +1,48 @@
+<!-- pages/profile/certification/certification.wxml -->
+<view class="container certification-page-container">
+    <text class="h1 page-main-title">负责人身份认证</text>
+
+    <!-- 认证状态及提示信息 -->
+    <view class="certification-status-wrapper card" wx:if="{{userCertificationInfo.statusText}}">
+        <text class="status-text-display {{userCertificationInfo.statusClass}}">{{userCertificationInfo.statusText}}</text>
+        <text class="p text-sm status-remark-display" wx:if="{{userCertificationInfo.remark}}">{{userCertificationInfo.remark}}</text>
+        <!-- 如果是提示登录状态，显示登录按钮 -->
+        <button wx:if="{{!isUserLoggedIn && !isLoadingStatus}}" class="btn btn-sm btn-inline-login" bindtap="goToLogin">
+            前往登录
+        </button>
+    </view>
+
+    <!-- 认证表单，仅在允许提交且已登录时显示 -->
+    <block wx:if="{{canSubmitForm && isUserLoggedIn}}">
+        <text class="p page-description">提交您的认证信息，审核通过后即可获得相应权限。</text>
+        <view class="card form-card-actual">
+            <view class="form-group">
+                <label class="form-label" for="phoneInput">手机号</label>
+                <input id="phoneInput" class="input-field" type="number"
+                       placeholder="请输入您的手机号码"
+                       value="{{formData.phone}}"
+                       bindinput="handleFormDataInput" data-field="phone" />
+            </view>
+            <view class="form-group">
+                <label class="form-label" for="identityInput">身份证号</label>
+                <input id="identityInput" class="input-field" type="idcard"
+                       placeholder="请输入您的身份证号码"
+                       value="{{formData.identity}}"
+                       bindinput="handleFormDataInput" data-field="identity" />
+            </view>
+        </view>
+        <button class="btn btn-primary btn-full-width btn-submit-certification" bindtap="submitCertification" disabled="{{isSubmitting}}">
+            提交认证
+        </button>
+    </block>
+
+    <!-- 如果已认证或审核中（虽然当前逻辑只有已认证），显示不同提示 -->
+    <view class="already-certified-info" wx:if="{{!canSubmitForm && isUserLoggedIn}}">
+        <text class="p" wx:if="{{userCertificationInfo.statusNumber === 1}}">您已通过负责人认证，无需重复提交。</text>
+        <!-- 如果有其他不可提交的状态，也可以在这里加提示 -->
+    </view>
+
+    <view wx:if="{{isLoadingStatus && !userCertificationInfo.statusText}}" class="loading-placeholder">
+        <text>正在加载认证状态...</text>
+    </view>
+</view>

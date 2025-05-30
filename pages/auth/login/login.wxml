@@ -1,0 +1,29 @@
+<!-- pages/auth/login/login.wxml -->
+<view class="container login-page-container">
+    <view class="logo-section">
+        <image class="app-logo" src="/assets/images/app-logo.png" mode="aspectFit"/>
+        <text class="app-name-text">手语星球</text> <!-- 或者你们的APP名称 -->
+    </view>
+
+    <view class="login-actions-section">
+        <!-- 修改点：不再使用 open-type="getPhoneNumber"，改为普通按钮绑定新方法 -->
+        <button type="primary" class="btn login-button" bindtap="handlePrimaryLogin" wx:if="{{!isLoggedIn}}" disabled="{{isLoggingIn}}">
+            微信授权登录
+        </button>
+
+        <view class="loading-indicator" wx:if="{{isLoggingIn}}">
+            <!-- ... loading 组件 ... -->
+            <text class="loading-text">登录中...</text>
+        </view>
+    </view>
+
+    <view class="agreement-section">
+        <checkbox-group bindchange="onAgreementChange">
+            <checkbox value="agreed" checked="{{hasAgreedPrivacy}}" class="agreement-checkbox"/>
+        </checkbox-group>
+        <text class="agreement-text">我已阅读并同意</text>
+        <text class="link-text" bindtap="navigateToUserAgreement">《用户服务协议》</text>
+        <text class="agreement-text">与</text>
+        <text class="link-text" bindtap="navigateToPrivacyPolicy">《隐私政策》</text>
+    </view>
+</view>

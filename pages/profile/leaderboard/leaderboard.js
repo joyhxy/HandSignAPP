@@ -1,93 +1,181 @@
 // pages/profile/leaderboard/leaderboard.js
+import request from '../../../utils/request.js';
+const app = getApp();
+const IMAGE_BASE_URL = 'https://222.186.168.45:8080'; // 确保图片基础路径正确
+
 Page({
   data: {
-      leaderboardTypes: [
-          { id: 'points', name: '积分榜', unit: '分' },
-          { id: 'studyTime', name: '学习时长榜', unit: '小时' },
-          { id: 'volunteerService', name: '志愿服务榜', unit: '次' } // 或 '小时'
-      ],
-      currentBoardType: 'points', // 默认显示积分榜
-      currentBoardUnit: '分', // 当前榜单的单位
-      currentUserRank: null, // { rank, name, avatarUrl, score, scoreFormatted }
-      leaderboardData: [], // { userId, rank, name, avatarUrl, score, scoreFormatted, isCurrentUser }
-      isLoading: false
+    leaderboardTypes: [
+      { id: 'pointsRank', name: '积分榜', unit: '分', apiUrl: '/user/top/count', scoreField: 'count', processingType: 'directAsInt' },
+      { id: 'questionRank', name: '题目排行榜', unit: '题', apiUrl: '/user/top/ti', scoreField: 'task', processingType: 'countCommaSeparated' },
+      { id: 'badgeRank', name: '勋章排行榜', unit: '枚', apiUrl: '/user/top/xun', scoreField: 'xun', processingType: 'directAsInt' }
+    ],
+    currentBoardType: 'pointsRank', // 默认显示积分榜
+    currentBoardUnit: '分',
+    currentUserRank: null,
+    leaderboardData: [],
+    isLoading: false,
+    topNCount: 10, // 所有榜单都先用这个参数，如果特定榜单用分页，再调整
+    // 如果需要分页，取消注释这些
+    // currentPage: 1,
+    // pageSize: 10,
+    // hasMoreData: true
   },
 
   onLoad: function (options) {
-      this.loadLeaderboard();
+    const defaultBoard = this.data.leaderboardTypes.find(b => b.id === this.data.currentBoardType);
+    if (defaultBoard) {
+        this.setData({ currentBoardUnit: defaultBoard.unit });
+    }
+    this.loadLeaderboard(true);
   },
 
   onBoardTypeTap: function(event) {
-      const boardId = event.currentTarget.dataset.id;
-      const selectedBoard = this.data.leaderboardTypes.find(b => b.id === boardId);
-      if (selectedBoard && this.data.currentBoardType !== boardId) {
-          this.setData({
-              currentBoardType: boardId,
-              currentBoardUnit: selectedBoard.unit,
-              leaderboardData: [], // 清空旧数据
-              currentUserRank: null // 清空当前用户排名
-          });
-          this.loadLeaderboard();
+    const boardId = event.currentTarget.dataset.id;
+    const selectedBoard = this.data.leaderboardTypes.find(b => b.id === boardId);
+    if (selectedBoard && this.data.currentBoardType !== boardId) {
+      if (!selectedBoard.apiUrl) {
+        wx.showToast({ title: `${selectedBoard.name}暂未开放`, icon: 'none' });
+        return;
       }
+      this.setData({
+        currentBoardType: boardId,
+        currentBoardUnit: selectedBoard.unit,
+        leaderboardData: [],
+        currentUserRank: null,
+        // currentPage: 1, // 如果使用分页
+        // hasMoreData: true,
+      });
+      this.loadLeaderboard(true);
+    }
   },
 
-  loadLeaderboard: function() {
-      this.setData({ isLoading: true });
-      wx.showLoading({ title: '加载中...' });
+  loadLeaderboard: function(isRefresh = false) {
+    // 对于TopN接口，isRefresh主要是清空列表重新加载
+    if (this.data.isLoading) return;
+    this.setData({ isLoading: true });
+    if (isRefresh) {
+        this.setData({ leaderboardData: [] });
+    }
+    wx.showLoading({ title: '加载中...' });
 
-      // --- 模拟API请求 ---
-      setTimeout(() => {
-          const type = this.data.currentBoardType;
-          let mockRankData = [];
-          let mockCurrentUser = null;
-          const currentUserIdFromApp = "user123_self"; // 假设这是当前登录用户的ID
+    const currentBoardConfig = this.data.leaderboardTypes.find(b => b.id === this.data.currentBoardType);
+    if (!currentBoardConfig || !currentBoardConfig.apiUrl) {
+      console.error("当前榜单类型API URL未配置");
+      this.setData({ isLoading: false }); wx.hideLoading(); wx.stopPullDownRefresh();
+      return;
+    }
 
-          if (type === 'points') {
-              mockRankData = [
-                  { userId: 'user001', rank: 1, name: '学习标兵王', avatarUrl: null, score: 3580 },
-                  { userId: 'user002', name: '爱心大使李', avatarUrl: '/assets/images/avatar_placeholder.png', score: 3120 },
-                  { userId: 'user003', name: '手语翻译家赵', avatarUrl: null, score: 2950 },
-                  { userId: 'user004', name: '志愿者小张', avatarUrl: null, score: 2800 },
-                  { userId: currentUserIdFromApp, rank: 15, name: '手语小能手', avatarUrl: '/assets/images/avatar_placeholder.png', score: 1250 }, // 当前用户
-                  { userId: 'user005', name: '默默学习者', avatarUrl: null, score: 2650 },
-              ].sort((a,b) => b.score - a.score).map((item, index) => ({...item, rank: index + 1, isCurrentUser: item.userId === currentUserIdFromApp }));
-              mockCurrentUser = mockRankData.find(u => u.isCurrentUser);
-          } else if (type === 'studyTime') {
-              mockRankData = [
-                  { userId: 'user001', name: '学海无涯张', avatarUrl: null, score: 150.5 },
-                  { userId: currentUserIdFromApp, name: '手语小能手', avatarUrl: '/assets/images/avatar_placeholder.png', score: 80.2 },
-                  { userId: 'user003', name: '挑灯夜读李', avatarUrl: null, score: 120.0 },
-              ].sort((a,b) => b.score - a.score).map((item, index) => ({...item, rank: index + 1, isCurrentUser: item.userId === currentUserIdFromApp }));
-              mockCurrentUser = mockRankData.find(u => u.isCurrentUser);
-          } else { // volunteerService
-               mockRankData = [
-                  { userId: currentUserIdFromApp, name: '手语小能手', avatarUrl: '/assets/images/avatar_placeholder.png', score: 5 },
-                  { userId: 'user002', name: '奉献之星王', avatarUrl: null, score: 12 },
-              ].sort((a,b) => b.score - a.score).map((item, index) => ({...item, rank: index + 1, isCurrentUser: item.userId === currentUserIdFromApp }));
-              mockCurrentUser = mockRankData.find(u => u.isCurrentUser);
+    const apiUrl = currentBoardConfig.apiUrl;
+    let requestParams = {
+        number: this.data.topNCount // 三个接口都使用 number 参数查询前几名
+    };
+    // 如果某个榜单支持分页，可以在这里根据 currentBoardType 添加 page 和 pagesize
+    // if (this.data.currentBoardType === 'somePagedBoard') {
+    //   requestParams.page = this.data.currentPage;
+    //   requestParams.pagesize = this.data.pageSize;
+    //   delete requestParams.number; // 移除 number 参数
+    // }
+
+    console.log(`Requesting leaderboard: ${apiUrl}`, requestParams);
+
+    request({
+      url: apiUrl,
+      method: 'GET',
+      data: requestParams,
+      expectDirectData: true // **假设这三个接口都直接返回 {total, records} 结构**
+    })
+    .then(directApiResponseData => {
+      console.log(`API Response for ${apiUrl} (direct data):`, JSON.stringify(directApiResponseData));
+
+      const rawUserList = (directApiResponseData && Array.isArray(directApiResponseData.records)) ? directApiResponseData.records : [];
+      // const totalCount = (directApiResponseData && directApiResponseData.total !== undefined) ? parseInt(directApiResponseData.total, 10) : 0;
+      // 对于TopN，totalCount可能就是返回的列表长度或者API不提供
+
+      if (!Array.isArray(rawUserList)) {
+          console.error(`解析 ${apiUrl} 响应失败：期望 records 是一个数组`, rawUserList);
+          this.setData({ leaderboardData: [], hasMoreData: false });
+          return;
+      }
+
+      const formattedItems = rawUserList.map((item, index) => {
+        const name = item.username || '匿名用户'; // 所有榜单都用 username
+        let avatarUrl = '/assets/images/avatar_placeholder.png';
+        if (item.img && typeof item.img === 'string') { // 所有榜单都用 img
+            if (item.img.startsWith('http')) avatarUrl = item.img;
+            else if (item.img.includes('/') && item.img.includes('.')) {
+                let path = item.img;
+                if (IMAGE_BASE_URL.endsWith('/') && path.startsWith('/')) path = path.substring(1);
+                else if (!IMAGE_BASE_URL.endsWith('/') && !path.startsWith('/')) { if(path) path = '/' + path; }
+                avatarUrl = IMAGE_BASE_URL + path;
+            } else {
+                console.warn(`User ${name} (ID: ${item.id}): Invalid image value "${item.img}", using placeholder.`);
+            }
+        }
+
+        let scoreValue = 0;
+        let scoreFormattedDisplay = "0";
+        const scoreField = currentBoardConfig.scoreField;
+        const processingType = currentBoardConfig.processingType;
+        const rawScoreData = item[scoreField];
+
+        if (processingType === 'countCommaSeparated' && typeof rawScoreData === 'string') {
+            scoreValue = rawScoreData.split(',').filter(s => s.trim() !== '').length;
+            scoreFormattedDisplay = scoreValue.toString();
+        } else if (processingType === 'directAsInt' && typeof rawScoreData !== 'undefined') {
+            scoreValue = parseInt(rawScoreData) || 0; // 直接取整
+            scoreFormattedDisplay = scoreValue.toString();
+        } else if (processingType === 'divideBy60Fixed1' && typeof rawScoreData !== 'undefined') {
+            scoreValue = parseFloat(rawScoreData) || 0;
+            scoreFormattedDisplay = (scoreValue / 60).toFixed(currentBoardConfig.scoreFixedDigits || 1);
+        }
+        // 可以为更多 processingType 添加逻辑，或者直接用 item[scoreField] 如果不需要处理
+
+        const userId = item.id; // 所有榜单都用 id 作为 userId
+
+        return {
+          userId: userId,
+          rank: index + 1, // Top N 列表，直接用索引作为排名
+          name: name,
+          avatarUrl: avatarUrl,
+          score: scoreValue,
+          scoreFormatted: scoreFormattedDisplay,
+          isCurrentUser: app.globalData.userInfo && userId === app.globalData.userInfo.id
+        };
+      });
+
+      this.setData({
+        leaderboardData: formattedItems,
+        hasMoreData: false, // Top N 查询通常没有更多数据
+        // currentPage: this.data.currentPage + 1, // 如果使用分页
+        // hasMoreData: formattedItems.length > 0 && updatedLeaderboardData.length < totalCount, // 如果使用分页
+      });
+
+      // 更新当前用户排名显示
+      const currentUserInList = formattedItems.find(u => u.isCurrentUser);
+      if (currentUserInList) {
+        this.setData({ currentUserRank: currentUserInList });
+      } else if (app.globalData.userInfo && app.globalData.userInfo.id) {
+        this.setData({
+          currentUserRank: {
+            rank: '...', name: (app.globalData.userInfo.name || '我') + ' (未在Top'+this.data.topNCount+')',
+            avatarUrl: app.globalData.userInfo.avatarUrl || '/assets/images/avatar_placeholder.png',
+            scoreFormatted: '-'
           }
+        });
+      } else {
+        this.setData({currentUserRank: null});
+      }
 
-          // 格式化分数 (如果需要)
-          mockRankData.forEach(item => {
-              if (type === 'studyTime') item.scoreFormatted = parseFloat(item.score).toFixed(1);
-              else item.scoreFormatted = parseInt(item.score);
-          });
-          if(mockCurrentUser) {
-              if (type === 'studyTime') mockCurrentUser.scoreFormatted = parseFloat(mockCurrentUser.score).toFixed(1);
-              else mockCurrentUser.scoreFormatted = parseInt(mockCurrentUser.score);
-          }
-
-
-          this.setData({
-              leaderboardData: mockRankData,
-              currentUserRank: mockCurrentUser,
-              isLoading: false
-          });
-          wx.hideLoading();
-          wx.stopPullDownRefresh();
-      }, 1000);
-      // TODO: 真实API请求，API应支持按类型获取排行榜数据，并包含当前用户的排名信息
+    })
+    .catch(err => { console.error(`API获取排行榜 (${apiUrl}) 失败:`, err); })
+    .finally(() => {
+      this.setData({ isLoading: false });
+      wx.hideLoading();
+      wx.stopPullDownRefresh();
+    });
   },
+
   onPullDownRefresh: function() {
       this.loadLeaderboard();
   }

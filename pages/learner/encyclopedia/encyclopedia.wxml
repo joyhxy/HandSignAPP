@@ -1,0 +1,40 @@
+<!-- pages/learner/encyclopedia/encyclopedia.wxml -->
+<view class="container encyclopedia-page-container">
+    <text class="h1 page-main-title">手势百科</text>
+
+    <!-- 可以后续添加搜索框和筛选条件 -->
+    <!-- <view class="search-and-filter-section"> ... </view> -->
+
+    <view class="gestures-grid" wx:if="{{gestures.length > 0}}">
+        <view class="card gesture-card-item" wx:for="{{gestures}}" wx:key="id"
+              bindtap="navigateToGestureDetail" data-id="{{item.id}}">
+            <view class="gesture-image-placeholder">
+                <image wx:if="{{item.imageUrl}}" class="gesture-image" src="{{item.imageUrl}}" mode="aspectFit"/> <!-- 商城是aspectFill，手势图可能aspectFit更好 -->
+                <text wx:else>图片待补充</text>
+            </view>
+            <view class="gesture-card-content">
+                <text class="p gesture-name">{{item.name}}</text>
+                <!-- 如果有其他简要信息也可以在这里显示 -->
+            </view>
+        </view>
+    </view>
+
+    <view wx:if="{{gestures.length === 0 && !isLoading && !firstLoad}}" class="empty-state">
+        <image class="empty-icon" src="/assets/images/empty-placeholder.png" mode="aspectFit" /> <!-- 准备一个通用空状态图 -->
+        <text class="p">暂无手势数据</text>
+        <!-- <button class="btn btn-secondary" bindtap="reloadGestures">重新加载</button> -->
+    </view>
+
+    <view wx:if="{{isLoading && gestures.length === 0}}" class="loading-state initial-loading">
+        <!-- 首次加载时的菊花图或骨架屏 -->
+        <text>加载中...</text>
+    </view>
+
+    <view wx:if="{{!hasMoreData && gestures.length > 0 && !isLoading}}" class="no-more-state">
+        <text>没有更多手势了~</text>
+    </view>
+
+    <view wx:if="{{isLoading && gestures.length > 0}}" class="loading-more-state">
+        <text>正在加载更多...</text>
+    </view>
+</view>

@@ -1,14 +1,14 @@
 <!-- pages/volunteer/activityDetails/activityDetails.wxml -->
-<view class="page-container">
+<view class="container details-page-container">
     <!-- 活动主图 -->
     <view class="hero-image-wrapper">
-        <image wx:if="{{activity.imageUrl}}" src="{{activity.imageUrl}}" mode="aspectFill" class="hero-image"/>
+        <image wx:if="{{activity.imageUrl}}" src="{{activity.imageUrl}}" mode="aspectFill" class="hero-image" binderror="onImageError" data-imagetype="hero"/>
         <view wx:else class="hero-image-placeholder">
-            <text>活动主图 待补充</text>
+            <text>{{activity.title === '加载中...' ? '图片加载中...' : '活动主图 待补充'}}</text>
         </view>
     </view>
 
-    <view class="content-wrapper"> <!-- 用于控制内容区的左右内边距 -->
+    <view class="content-wrapper">
         <text class="h1 activity-main-title">{{activity.title || '活动标题加载中...'}}</text>
 
         <view class="card info-summary-card">
@@ -31,7 +31,9 @@
 
         <view class="card details-content-card">
             <text class="h3 card-section-title">活动详情</text>
-            <text class="p description-text">{{activity.description || '暂无详细描述。'}}</text>
+            <text class="p description-text" wx:if="{{activity.description}}">{{activity.description}}</text>
+            <text class="p description-text" wx:else>暂无详细描述。</text>
+
 
             <text class="h4 card-sub-title" wx:if="{{activity.requirements && activity.requirements.length > 0}}">志愿者要求</text>
             <view class="requirements-list" wx:if="{{activity.requirements && activity.requirements.length > 0}}">
@@ -46,23 +48,37 @@
             <text class="h3 card-section-title">报名信息</text>
             <view class="form-group">
                 <label class="form-label" for="nameInput">姓名</label>
-                <input id="nameInput" class="input-field" type="text" placeholder="请输入您的姓名" model:value="{{formData.name}}" />
+                <input id="nameInput" class="input-field" type="text"
+                       placeholder="请输入您的姓名"
+                       value="{{formData.name}}"
+                       bindinput="handleFormDataInput"
+                       data-field="name" />
             </view>
             <view class="form-group">
                 <label class="form-label" for="phoneInput">联系电话</label>
-                <input id="phoneInput" class="input-field" type="number" placeholder="请输入您的手机号" model:value="{{formData.phone}}" />
+                <input id="phoneInput" class="input-field" type="number"
+                       placeholder="请输入您的手机号"
+                       value="{{formData.phone}}"
+                       bindinput="handleFormDataInput"
+                       data-field="phone" />
             </view>
             <view class="form-group">
                 <label class="form-label" for="experienceTextarea">手语经验简述 (选填)</label>
-                <textarea id="experienceTextarea" class="textarea-field" placeholder="简单描述您的手语学习或使用经验" maxlength="200" auto-height="{{true}}" model:value="{{formData.experience}}"></textarea>
+                <textarea id="experienceTextarea" class="textarea-field"
+                          placeholder="简单描述您的手语学习或使用经验" maxlength="200"
+                          auto-height="{{true}}"
+                          value="{{formData.experience}}"
+                          bindinput="handleFormDataInput"
+                          data-field="experience"></textarea>
             </view>
         </view>
     </view> <!-- content-wrapper end -->
 
     <!-- 底部固定按钮栏 -->
     <view class="bottom-action-bar">
-        <button class="btn btn-primary btn-full-width btn-submit-signup" bindtap="submitSignup" disabled="{{isLoading || isSubmitting}}">
-            确认报名 <text wx:if="{{activity.pointsRequired > 0}}">(需 {{activity.pointsRequired}} 积分)</text>
+        <button class="btn btn-primary btn-full-width btn-submit-signup" bindtap="submitSignup" disabled="{{isLoading || isSubmitting || activity.status === 'full' || activity.status === 'ended'}}">
+            {{activity.status === 'full' ? '名额已满' : (activity.status === 'ended' ? '活动已结束' : '确认报名')}}
+            <text wx:if="{{activity.pointsRequired > 0 && activity.status !== 'full' && activity.status !== 'ended'}}"> (需 {{activity.pointsRequired}} 积分)</text>
         </button>
     </view>
 </view>

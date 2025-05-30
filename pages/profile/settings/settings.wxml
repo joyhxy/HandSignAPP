@@ -1,0 +1,72 @@
+<!-- pages/profile/settings/settings.wxml -->
+<view class="container settings-page-container">
+    <text class="h1 page-main-title">设置</text>
+
+    <view class="settings-group">
+        <view class="setting-item" bindtap="navigateToEditProfile">
+            <view class="item-content">
+                <image class="item-icon" src="/assets/svgs/icon-edit-profile.svg" mode="aspectFit"/>
+                <text class="item-label">编辑个人资料</text>
+            </view>
+            <image class="arrow-icon" src="/assets/svgs/icon-chevron-right.svg" mode="aspectFit"/>
+        </view>
+        <view class="setting-item" bindtap="navigateToCertification">
+            <view class="item-content">
+                <image class="item-icon" src="/assets/svgs/icon-certification.svg" mode="aspectFit"/>
+                <text class="item-label">身份认证</text>
+            </view>
+            <view class="item-value-action">
+                <text class="text-sm status-text {{certificationStatusClass}}">{{certificationStatusText || '未认证'}}</text>
+                <image class="arrow-icon" src="/assets/svgs/icon-chevron-right.svg" mode="aspectFit"/>
+            </view>
+        </view>
+    </view>
+
+    <view class="settings-group">
+        <view class="setting-item">
+            <view class="item-content">
+                <image class="item-icon" src="/assets/svgs/icon-notifications.svg" mode="aspectFit"/>
+                <text class="item-label">消息通知</text>
+            </view>
+            <switch checked="{{messageNotification}}" bindchange="onNotificationChange"/>
+        </view>
+        <view class="setting-item" bindtap="clearCache">
+            <view class="item-content">
+                <image class="item-icon" src="/assets/svgs/icon-clear-cache.svg" mode="aspectFit"/>
+                <text class="item-label">清理缓存</text>
+            </view>
+            <view class="item-value-action">
+                <text class="text-sm text-gray">{{cacheSize}}</text>
+                <image class="arrow-icon" src="/assets/svgs/icon-chevron-right.svg" mode="aspectFit"/>
+            </view>
+        </view>
+    </view>
+
+    <view class="settings-group">
+        <view class="setting-item" bindtap="navigateToAboutUs">
+            <view class="item-content">
+                <image class="item-icon" src="/assets/svgs/icon-about-us.svg" mode="aspectFit"/>
+                <text class="item-label">关于我们</text>
+            </view>
+            <image class="arrow-icon" src="/assets/svgs/icon-chevron-right.svg" mode="aspectFit"/>
+        </view>
+        <view class="setting-item" bindtap="navigateToPrivacyPolicySettings">
+            <view class="item-content">
+                <image class="item-icon" src="/assets/svgs/icon-privacy.svg" mode="aspectFit"/>
+                <text class="item-label">隐私政策</text>
+            </view>
+            <image class="arrow-icon" src="/assets/svgs/icon-chevron-right.svg" mode="aspectFit"/>
+        </view>
+        <view class="setting-item" bindtap="navigateToUserAgreementSettings">
+            <view class="item-content">
+                <image class="item-icon" src="/assets/svgs/icon-agreement.svg" mode="aspectFit"/>
+                <text class="item-label">用户协议</text>
+            </view>
+            <image class="arrow-icon" src="/assets/svgs/icon-chevron-right.svg" mode="aspectFit"/>
+        </view>
+    </view>
+
+    <view class="logout-button-wrapper">
+        <button class="btn btn-logout" bindtap="logout">退出登录</button>
+    </view>
+</view>

@@ -1,0 +1,127 @@
+/* pages/learner/encyclopedia/encyclopedia.wxss */
+/* --- 从 app.wxss 或 page 引入全局变量 --- */
+page {
+  --bg-color: #F8F4F0;
+  --text-color-dark: #333333;
+  --text-color-light: #666666;
+  --accent-color: #FF8C00;
+  --card-bg-solid-white: white;
+  --font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+  --border-radius-sm: 16rpx;
+  --border-radius-md: 24rpx;
+  --border-radius-lg: 32rpx;
+  --shadow-card: 0 6rpx 20rpx rgba(0, 0, 0, 0.07); /* 调整阴影 */
+  --placeholder-bg: #EFEFEF;
+  --placeholder-text-color: #B0B0B0;
+}
+view, text, button, image, scroll-view { box-sizing: border-box; }
+
+.encyclopedia-page-container {
+  padding: 30rpx 40rpx 40rpx;
+  background-color: var(--bg-color);
+  min-height: 100vh;
+  font-family: var(--font-family);
+}
+
+.page-main-title {
+  display: block; font-size: 48rpx; font-weight: 600;
+  color: var(--text-color-dark); margin-bottom: 40rpx; text-align: left;
+}
+
+/* --- 手势网格布局 --- */
+.gestures-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 每行2个卡片，如果想3个就用 repeat(3, 1fr) */
+  gap: 30rpx; /* 卡片之间的间距 */
+}
+
+/* --- 手势卡片样式 (参考商城商品卡片) --- */
+.card.gesture-card-item {
+  background-color: var(--card-bg-solid-white);
+  border-radius: var(--border-radius-md); /* 手势卡片圆角可以小一点 */
+  box-shadow: var(--shadow-card);
+  overflow: hidden; /* 确保图片按圆角裁剪 */
+  display: flex;
+  flex-direction: column; /* 图片在上，文字在下 */
+  width: 100%; /* grid item 会自动分配宽度 */
+}
+.card-main-content { /* 新增，包裹主要可点击区域 */
+  flex-grow: 1; /* 如果父级是flex */
+  /* cursor: pointer; */
+}
+
+.remove-button-wrapper {
+  /* display: flex; justify-content: flex-end; */ /* 将按钮推到右边 */
+  text-align: right; /* 或者简单右对齐 */
+  padding-top: 10rpx; /* 与上方内容的间距 */
+  margin-top: auto; /* 如果卡片是flex-column，将按钮推到底部 */
+}
+.btn-remove-wrong-item {
+  background-color: transparent !important; /* 去掉按钮背景 */
+  border: none !important;
+  padding: 10rpx !important; /* 调整点击区域 */
+  line-height: 1 !important;
+  min-width: auto; /* 去掉最小宽度限制 */
+  width: auto;
+  display: inline-flex; /* 让图标和文字（如果加的话）对齐 */
+  align-items: center;
+}
+.btn-remove-wrong-item::after { border: none !important; } /* 去掉button的默认边框 */
+.remove-icon {
+  width: 36rpx; /* 调整删除图标大小 */
+  height: 36rpx;
+  opacity: 0.6;
+}
+.btn-remove-wrong-item:active .remove-icon {
+  opacity: 1;
+}
+.gesture-card-item:active { /* 点击反馈 */
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+
+.gesture-image-placeholder {
+  width: 100%;
+  height: 280rpx; /* 手势图片高度，根据实际图片比例调整 */
+  background-color: var(--placeholder-bg);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--placeholder-text-color); font-size: 24rpx;
+  /* border-bottom: 1rpx solid #f0f0f0; */ /* 图片和内容区之间的分割线 (可选) */
+}
+.gesture-image {
+  width: 100%;
+  height: 100%;
+}
+
+.gesture-card-content {
+  padding: 20rpx; /* 卡片内容区的内边距 */
+  text-align: center; /* 手势名称居中 */
+}
+.gesture-name { /* p */
+  font-size: 28rpx; /* 手势名称字体大小 */
+  color: var(--text-color-dark);
+  font-weight: 500; /* medium weight */
+  line-height: 1.4;
+  /* 文字溢出处理 (单行) */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- 状态提示 --- */
+.empty-state, .loading-state, .no-more-state, .loading-more-state {
+  text-align: center;
+  padding: 60rpx 0;
+  font-size: 26rpx;
+  color: var(--text-color-light);
+}
+.empty-state .empty-icon {
+  width: 150rpx;
+  height: 150rpx;
+  margin-bottom: 20rpx;
+  opacity: 0.5;
+}
+.initial-loading { /* 首次加载时的loading可以做得更占满一些 */
+  padding-top: 150rpx;
+}

@@ -1,0 +1,135 @@
+/* pages/volunteer/publishActivity/publishActivity.wxss */
+page {
+  /* ... (全局变量，确保定义了 --bg-color, --card-bg-solid-white, --accent-color, --text-color-dark, --text-color-light, --border-radius-lg, --border-radius-md, --shadow-soft, --placeholder-text-color) ... */
+  --page-horizontal-padding: 40rpx;
+  --form-input-bg: #F7F7F7; /* 输入框背景色 */
+  --border-color-light: #EAEAEA; /* 浅边框色 */
+}
+view, text, input, textarea, button, label, picker { box-sizing: border-box; }
+
+.publish-activity-page-container {
+  padding: 20rpx var(--page-horizontal-padding) 40rpx; /* 上20，左右40，下40 */
+  background-color: var(--bg-color, #F8F4F0);
+  min-height: 100vh;
+  font-family: var(--font-family);
+}
+
+.page-header {
+  margin-bottom: 30rpx;
+  /* 如果有返回按钮，这里可以用flex布局 */
+}
+.page-main-title { /* h1 */
+  font-size: 44rpx; /* 标题可以略小 */
+  font-weight: 600;
+  color: var(--text-color-dark);
+  text-align: left;
+}
+
+/* --- 表单卡片 --- */
+.form-section-card {
+  background-color: var(--card-bg-solid-white, white);
+  border-radius: var(--border-radius-lg);
+  padding: 30rpx 30rpx 10rpx; /* 底部padding小一点，因为最后一个form-group有mb */
+  margin-bottom: 30rpx;
+  box-shadow: var(--shadow-soft);
+}
+.card-title { /* h3 */
+  font-size: 32rpx; font-weight: 600; color: var(--text-color-dark);
+  margin-bottom: 30rpx; padding-bottom: 20rpx;
+  border-bottom: 1rpx solid var(--border-color-light);
+}
+.form-section-card .card-title:first-child { /* 如果卡片第一个就是标题 */
+  margin-top: -10rpx; /* 向上微调 */
+}
+
+
+.form-group { margin-bottom: 30rpx; }
+.form-label {
+  display: block; font-size: 28rpx; color: var(--text-color-dark);
+  margin-bottom: 16rpx; font-weight: 500;
+}
+.required-mark { color: var(--accent-color); margin-left: 6rpx; }
+
+.input-field, .textarea-field, .picker-display-box {
+  width: 100%;
+  min-height: 88rpx; /* 输入框和picker的统一最小高度 */
+  padding: 20rpx 24rpx;
+  background-color: var(--form-input-bg);
+  border: 1rpx solid var(--border-color-light);
+  border-radius: var(--border-radius-sm);
+  font-size: 28rpx;
+  color: var(--text-color-dark);
+  display: flex; /* 用于picker内部元素对齐 */
+  align-items: center;
+}
+.textarea-field {
+  padding: 20rpx 24rpx; /* textarea的padding需要单独设置 */
+  min-height: 160rpx; /* textarea最小高度 */
+  line-height: 1.6;
+}
+.input-field::placeholder, .textarea-field::placeholder, .picker-display-box.placeholder {
+  color: var(--placeholder-text-color, #BBBBBB);
+}
+.picker-display-box.selected { color: var(--text-color-dark); }
+.picker-display-box { justify-content: space-between; } /* 让文字和箭头分开 */
+.picker-arrow-icon { width: 28rpx; height: 28rpx; opacity: 0.5; }
+
+/* 时间选择行 */
+.time-picker-row { display: flex; gap: 20rpx; margin-bottom: 20rpx; }
+.time-picker-row.end-time-row { margin-bottom: 0; } /* 最后一行时间选择无下外边距 */
+.picker-display-box.half { flex: 1; } /* 让日期和时间选择器平分宽度 */
+.time-separator { display: flex; align-items: center; color: var(--text-color-light); }
+
+
+/* 地图选点 */
+.btn-inline.btn-choose-location {
+  display: inline-flex; /* 改为inline-flex */
+  align-items: center;
+  padding: 12rpx 24rpx;
+  font-size: 26rpx;
+  color: var(--accent-color);
+  background-color: transparent;
+  border: 1rpx solid var(--accent-color);
+  border-radius: var(--border-radius-md);
+  margin-top: 16rpx;
+}
+.btn-icon { width: 30rpx; height: 30rpx; margin-right: 8rpx; }
+.location-coordinates { display: block; font-size: 22rpx; color: #999; margin-top: 10rpx; }
+
+/* --- 图片上传 --- */
+.uploader-item { /* 每个上传项 */ }
+.image-uploader-wrapper {
+  display: flex; /* 可以放多个上传按钮或预览图，如果允许上传多张 */
+  flex-wrap: wrap;
+  gap: 20rpx;
+}
+.upload-action-button, .image-preview-box {
+  width: 180rpx; height: 180rpx;
+  border-radius: var(--border-radius-md);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background-color: var(--form-input-bg);
+  border: 2rpx dashed var(--border-color-light);
+  color: var(--text-color-light);
+  font-size: 24rpx;
+  position: relative; /* 为了删除按钮定位 */
+}
+.upload-action-button:active { background-color: #eee; }
+.upload-icon { width: 60rpx; height: 60rpx; margin-bottom: 10rpx; opacity: 0.6; }
+.image-preview-box .preview-image { width: 100%; height: 100%; border-radius: var(--border-radius-md); }
+.delete-image-button {
+  position: absolute; top: -10rpx; right: -10rpx;
+  width: 40rpx; height: 40rpx; line-height: 36rpx; text-align: center;
+  background-color: rgba(0,0,0,0.5); color: white;
+  border-radius: 50%; font-size: 28rpx; font-weight: bold;
+}
+
+
+/* --- 提交按钮 --- */
+.btn-publish-action { /* btn btn-primary btn-block */
+  width: 100%; height: 90rpx; line-height: 90rpx;
+  background-color: var(--accent-color); color: white;
+  border-radius: var(--border-radius-md); font-size: 32rpx; font-weight: 500;
+  border: none; box-shadow: var(--shadow-soft); margin-top: 40rpx; /* 与上方卡片的间距 */
+}
+.btn-publish-action[disabled] { background-color: #ccc; box-shadow: none; }

@@ -1,123 +1,122 @@
 // pages/learner/gestureDetails/gestureDetails.js
+import request from '../../../utils/request.js';
+const MEDIA_BASE_URL = 'https://222.186.168.45:8080'; // 确保这是正确的媒体基础URL
+
 Page({
   data: {
-      gestureId: null,
-      gesture: { // 初始化手势数据结构
-          name: '加载中...',
-          translation: '',
-          mediaUrl: null, // 视频或图片URL
-          mediaType: 'image', // 'image' or 'video'
-          tags: [],
-          description: '',
-          descriptionSteps: [], // 例如: ["1. xxx", "2. yyy"]
-          usageExamples: [],
-          dialogueExample: null, // { title: '情景对话：', lines: [{actor: 'A', text: '[你好] (手势)'}, ...] }
-          confusingGestures: [
-              // { name: '不客气', mediaUrl: null, description: '注意区分“不客气”的手势...' }
-          ]
-      },
-      isLoading: true,
-      errorMessage: ''
+    gestureId: null,
+    gesture: { // 初始化手势数据结构
+        name: '加载中...',
+        translation: '', // 接口文档没提供，先空着
+        mediaUrl: null,
+        mediaType: 'image',
+        tags: [], // 接口文档没提供，先空着
+        description: '', // 将对应 API 的 descript
+        descriptionSteps: [],
+        usageExamples: [], // 接口文档没提供
+        dialogueExample: null, // 接口文档没提供
+        confusingGestures: [], // 接口文档没提供
+        // 根据API文档 schema
+        id: null,
+        image: null, // 原始 image 路径
+        video: null, // 原始 video 路径
+    },
+    isLoading: true,
+    errorMessage: ''
   },
 
   onLoad: function (options) {
-      if (options.id) {
-          this.setData({ gestureId: options.id });
-          this.fetchGestureDetails(options.id);
-      } else {
-          this.setData({ errorMessage: '未找到手势信息', isLoading: false });
-          wx.showToast({ title: '参数错误', icon: 'none' });
-      }
+    if (options.id) {
+      this.setData({ gestureId: options.id });
+      this.fetchGestureDetails(options.id);
+    } else {
+      this.setData({ isLoading: false, errorMessage: '手势ID缺失' });
+      wx.showToast({ title: '参数错误', icon: 'none' });
+    }
   },
 
   fetchGestureDetails: function(id) {
-      this.setData({ isLoading: true, errorMessage: '' });
-      wx.showLoading({ title: '加载中...' });
+    this.setData({ isLoading: true, errorMessage: '' });
+    wx.showLoading({ title: '加载中...' });
 
-      // --- 模拟API请求 ---
-      setTimeout(() => {
-          const mockGestureData = { // 模拟单个手势的详细数据
-              id: id,
-              name: '谢谢',
-              translation: 'Thank You',
-              mediaUrl: '/assets/images/placeholder-gesture-thankyou.png', // 替换为真实或更好的占位图
-              mediaType: 'image',
-              tags: ['日常用语', '礼貌'],
-              description: "这是一个详细的手势描述，通常会包含多个步骤来解释如何做出这个手势。",
-              descriptionSteps: [
-                  "1. 右手弯曲，手指并拢，掌心向左下方。",
-                  "2. 手臂自然前伸，同时微微点头示意。",
-                  "3. 注意面带微笑，表达真诚的感谢。"
-              ],
-              usageExamples: [
-                  "收到礼物时，向对方做出 [谢谢] 的手势。",
-                  "别人帮助你后，表达感谢时使用。"
-              ],
-              dialogueExample: {
-                  title: '情景对话：',
-                  lines: [
-                      { actor: 'A', text: '[你好] (手势)' },
-                      { actor: 'B', text: '[你好] (手势)，这个送给你。' },
-                      { actor: 'A', text: '[谢谢] (手势)' }
-                  ]
-              },
-              confusingGestures: [
-                  {
-                      name: '不客气',
-                      mediaUrl: '/assets/images/placeholder-gesture-youarewelcome-small.png', // 替换
-                      mediaType: 'image',
-                      description: '注意区分“不客气”的手势，动作方向和幅度不同。这个手势通常是双手掌心向上，向前轻推。'
-                  },
-                  {
-                      name: '请',
-                      mediaUrl: null, // 无图占位
-                      mediaType: 'image',
-                      description: '“请”的手势与“谢谢”在某些文化中可能相似，需注意区分。'
-                  }
-              ]
-          };
+    request({
+      url: '/learn/id', // 接口路径
+      method: 'GET',
+      data: { id: id } // Query参数 id
+      // 假设此接口遵循 {code, msg, data} 结构，所以不传 expectDirectData
+    })
+    .then(apiGestureData => { // apiGestureData 是 API 响应的 data.data 部分 (即手势对象)
+      console.log(`API /learn/id Response (data.data part):`, apiGestureData);
 
-          // 模拟一个找不到的情况
-          if (id === "notfound") {
-               this.setData({
-                  gesture: {},
-                  isLoading: false,
-                  errorMessage: '手势信息不存在'
-              });
-              wx.hideLoading();
-              return;
-          }
+      if (apiGestureData && apiGestureData.id !== undefined) {
+        let mediaUrl = '';
+        let mediaType = 'image';
+        // 根据Schema，字段是 video 和 image
+        if (apiGestureData.video && apiGestureData.video.trim() !== "") {
+            mediaType = 'video';
+            mediaUrl = this.buildMediaUrl(apiGestureData.video);
+        } else if (apiGestureData.image && apiGestureData.image.trim() !== "") {
+            mediaType = 'image';
+            mediaUrl = this.buildMediaUrl(apiGestureData.image);
+        } else {
+            mediaUrl = '/assets/images/gesture-placeholder-large.png'; // 准备一个详情页用的大占位图
+        }
+
+        // 手势描述，API字段是 descript
+        const descriptionFromApi = apiGestureData.descript || '';
+        const descriptionSteps = descriptionFromApi.split('\n').map((step, i) => {
+            const trimmedStep = step.trim();
+            // 简单判断是否已经有序号，避免重复添加 "1. 1. xxx"
+            if (trimmedStep && !/^\d+\.\s*/.test(trimmedStep)) {
+                return `${i + 1}. ${trimmedStep}`;
+            }
+            return trimmedStep;
+        }).filter(s => s.length > 0);
 
 
-          this.setData({
-              gesture: mockGestureData,
-              isLoading: false
-          });
-          wx.hideLoading();
-      }, 1000);
+        this.setData({
+          'gesture.id': apiGestureData.id,
+          'gesture.name': apiGestureData.name || '手势名称',
+          'gesture.mediaUrl': mediaUrl,
+          'gesture.mediaType': mediaType,
+          'gesture.description': descriptionFromApi, // 保存原始描述
+          'gesture.descriptionSteps': descriptionSteps,
+          'gesture.image': apiGestureData.image, // 保存原始API路径
+          'gesture.video': apiGestureData.video, // 保存原始API路径
+          // --- 以下字段，如果 /learn/id 接口文档中没有定义，则会是空或默认值 ---
+          // 'gesture.translation': apiGestureData.translation || '',
+          // 'gesture.tags': apiGestureData.tags_array || [],
+          // 'gesture.usageExamples': apiGestureData.usage_examples_array || [],
+          // 'gesture.confusingGestures': apiGestureData.confusing_gestures_array || [],
+          isLoading: false
+        });
+      } else {
+        console.warn("fetchGestureDetails: API返回的手势数据为空或格式不正确", apiGestureData);
+        this.setData({ isLoading: false, errorMessage: (apiGestureData && apiGestureData.msg) || '无法加载手势详情' });
+        // wx.showToast({ title: '手势信息获取失败', icon: 'none' });
+      }
+    })
+    .catch(err => {
+      console.error('API获取手势详情失败:', err);
+      this.setData({ isLoading: false, errorMessage: err.msg || '加载手势详情失败' });
+    })
+    .finally(() => {
+        // wx.hideLoading() 在 request.js 的 complete 中处理
+    });
+  },
 
-      // --- 真实API请求 (后续替换) ---
-      /*
-      const { request } = require('../../../utils/request');
-      request({
-          url: `/learn/gesture/${id}`, // 假设的API路径
-          method: 'GET'
-      }).then(res => {
-          if (res.code === 1 && res.data) {
-              // 可能需要处理 description 为 steps
-              if (res.data.description && typeof res.data.description === 'string') {
-                  res.data.descriptionSteps = res.data.description.split('\n').map((step, i) => `${i+1}. ${step.trim()}`).filter(s => s.length > 3);
-              }
-              this.setData({ gesture: res.data, isLoading: false });
-          } else {
-              this.setData({ errorMessage: res.msg || '加载手势详情失败', isLoading: false });
-          }
-      }).catch(err => {
-          this.setData({ errorMessage: '网络错误', isLoading: false });
-      }).finally(() => {
-          wx.hideLoading();
-      });
-      */
+  buildMediaUrl: function(path) { // 复用这个辅助函数
+    if (!path) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+        return path;
+    }
+    let baseUrl = MEDIA_BASE_URL;
+    if (baseUrl.endsWith('/') && path.startsWith('/')) {
+        path = path.substring(1);
+    } else if (!baseUrl.endsWith('/') && !path.startsWith('/')) {
+        if (path) path = '/' + path;
+    }
+    return baseUrl + path;
   },
 
   addToPractice: function() {

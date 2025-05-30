@@ -15,6 +15,14 @@
     ,"pages/profile/hearingTest/instructions/instructions"
     ,"pages/profile/hearingTest/inProgress/inProgress"
     ,"pages/profile/hearingTest/results/results"
+    ,"pages/auth/login/login"
+    ,"pages/learner/encyclopedia/encyclopedia"
+    ,"pages/profile/badgeWall/badgeWall"
+    ,"pages/profile/settings/settings"
+    ,"pages/profile/certification/certification"
+    ,"pages/profile/editProfile/editProfile"
+    ,"pages/learner/wrongAnswers/wrongAnswers"
+    ,"pages/volunteer/publishActivity/publishActivity"
   ],
   "window": {
     "backgroundTextStyle": "light",

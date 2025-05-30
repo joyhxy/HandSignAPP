@@ -29,9 +29,10 @@
     </view>
 
     <view class="card progress-info-card">
-        <view class="flex-between">
-            <text class="text-dark progress-text">今日进度: {{currentProgress}}/{{totalChallenges}}</text>
-            <text class="text-accent hint-text" bindtap="showHint">查看提示</text>
-        </view>
+    <view class="flex-between">
+        <!-- 修改点：使用 currentProgressDisplay (如果JS中setData了) 或 currentProgress + 1 -->
+        <text class="text-dark progress-text">今日进度: {{currentProgressDisplay || (currentProgress + 1)}}/{{totalChallenges}}</text>
+        <text class="text-accent hint-text" bindtap="showHint">查看提示</text>
     </view>
+</view>
 </view>

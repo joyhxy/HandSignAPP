@@ -1,0 +1,33 @@
+<!-- pages/learner/wrongAnswers/wrongAnswers.wxml -->
+<view class="container wrong-answers-page">
+    <text class="h1 page-main-title">错题回顾</text>
+    <view class="gestures-grid" wx:if="{{wrongAnswerItems.length > 0}}">
+        <view class="card gesture-card-item wrong-item-card"
+              wx:for="{{wrongAnswerItems}}" wx:key="id">
+            <view class="card-main-content" bindtap="navigateToGestureDetail" data-id="{{item.id}}">
+                <view class="gesture-image-placeholder">
+                    <image wx:if="{{item.imageUrl}}" class="gesture-image" src="{{item.imageUrl}}" mode="aspectFit"/>
+                    <text wx:else>图片待补充</text>
+                </view>
+                <view class="gesture-card-content">
+                    <text class="p gesture-name">{{item.name}}</text>
+                </view>
+            </view>
+            <!-- 新增：移除按钮 -->
+            <view class="remove-button-wrapper">
+                <button class="btn btn-icon btn-remove-wrong-item"
+                        size="mini" type="warn" 
+                        bindtap="confirmRemoveWrongItem" data-id="{{item.id}}" data-name="{{item.name}}">
+                    <image src="/assets/images/icon-delete-red.png" class="remove-icon"/>
+                    <!-- 移除 -->
+                </button>
+            </view>
+        </view>
+    </view>
+
+    <view wx:if="{{wrongAnswerItems.length === 0 && !isLoading && !firstLoad}}" class="empty-state">
+        <image class="empty-icon" src="/assets/images/empty-wrong-set.png" mode="aspectFit" /> <!-- 准备一个错题本空状态图 -->
+        <text class="p">太棒了，错题本是空的！</text>
+    </view>
+    <!-- ... 其他加载状态和无更多提示 ... -->
+</view>

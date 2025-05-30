@@ -1,0 +1,130 @@
+<!-- pages/volunteer/publishActivity/publishActivity.wxml -->
+<view class="container publish-activity-page-container">
+    <view class="page-header"> <!-- 用于放置返回按钮和标题 -->
+        <!-- 如果需要自定义导航栏，可以在这里加返回按钮 -->
+        <!-- <image class="back-icon" src="/assets/icons/arrow-left.svg" bindtap="navigateBack"/> -->
+        <text class="h1 page-main-title">发布新活动</text>
+    </view>
+
+    <form bindsubmit="onFormSubmit">
+        <!-- 基本信息卡片 -->
+        <view class="form-section-card">
+            <text class="h3 card-title">活动基本信息</text>
+            <view class="form-group">
+                <label class="form-label">活动名称 <text class="required-mark">*</text></label>
+                <input name="name" class="input-field" placeholder="请输入活动名称 (例如：社区手语角)" value="{{formData.name}}" bindinput="handleInputChange" data-field="name"/>
+            </view>
+
+            <view class="form-group">
+                <label class="form-label">活动类型 <text class="required-mark">*</text></label>
+                <picker name="type" mode="selector" range="{{activityTypes}}" range-key="name" value="{{activityTypeIndex}}" bindchange="onActivityTypeChange">
+                    <view class="picker-display-box {{formData.type ? 'selected' : 'placeholder'}}">
+                        {{formData.type || '请选择活动类型'}}
+                        <image class="picker-arrow-icon" src="/assets/svgs/icon-chevron-down.svg" mode="aspectFit"/>
+                    </view>
+                </picker>
+            </view>
+
+            <view class="form-group">
+                <label class="form-label">活动时间 <text class="required-mark">*</text></label>
+                <view class="time-picker-row">
+                    <!-- 开始日期 -->
+                    <picker mode="date" value="{{formDisplay.startDate}}" bindchange="onDateChange" data-field="startDate" start="{{minDate}}">
+                        <view class="picker-display-box half {{formDisplay.startDate ? 'selected' : 'placeholder'}}">
+                            <!-- **修改这里的条件和格式化** -->
+                            {{formDisplay.startDate && formDisplay.startDate.includes('-') ? (formDisplay.startDate.split('-')[0] + '年' + formDisplay.startDate.split('-')[1] + '月' + formDisplay.startDate.split('-')[2] + '日') : (formDisplay.startDate || '选择开始日期')}}
+                        </view>
+                    </picker>
+                    <!-- 开始时间 (时间格式通常没问题) -->
+                    <picker mode="time" value="{{formDisplay.startTime}}" bindchange="onTimeChange" data-field="startTime">
+                         <view class="picker-display-box half {{formDisplay.startTime ? 'selected' : 'placeholder'}}">
+                            {{formDisplay.startTime || '选择开始时间'}}
+                        </view>
+                    </picker>
+                </view>
+                <view class="time-picker-row end-time-row">
+                     <!-- 结束日期 -->
+                     <picker mode="date" value="{{formDisplay.endDate}}" bindchange="onDateChange" data-field="endDate" start="{{formDisplay.startDate || minDate}}">
+                        <view class="picker-display-box half {{formDisplay.endDate ? 'selected' : 'placeholder'}}">
+                             <!-- **修改这里的条件和格式化** -->
+                             {{formDisplay.endDate && formDisplay.endDate.includes('-') ? (formDisplay.endDate.split('-')[0] + '年' + formDisplay.endDate.split('-')[1] + '月' + formDisplay.endDate.split('-')[2] + '日') : (formDisplay.endDate || '选择结束日期')}}
+                        </view>
+                    </picker>
+                     <!-- 结束时间 -->
+                     <picker mode="time" value="{{formDisplay.endTime}}" bindchange="onTimeChange" data-field="endTime">
+                         <view class="picker-display-box half {{formDisplay.endTime ? 'selected' : 'placeholder'}}">
+                            {{formDisplay.endTime || '选择结束时间'}}
+                        </view>
+                    </picker>
+                </view>
+            </view>
+
+            <view class="form-group">
+                <label class="form-label">活动地点 <text class="required-mark">*</text></label>
+                <input name="location" class="input-field" placeholder="请输入详细活动地点" value="{{formData.location}}" bindinput="handleInputChange" data-field="location"/>
+                <button type="default" class="btn-inline btn-choose-location" bindtap="chooseLocationFromMap">
+                    <image src="/assets/svgs/icon-location-pin.svg" mode="aspectFit" class="btn-icon"/> 从地图选择
+                </button>
+                <text class="text-xs location-coordinates" wx:if="{{formData.longitude && formData.latitude}}">坐标：{{formData.longitude.toFixed(4)}}, {{formData.latitude.toFixed(4)}}</text>
+            </view>
+
+            <view class="form-group">
+                <label class="form-label">最大人数 <text class="required-mark">*</text></label>
+                <input name="max" class="input-field" type="number" placeholder="例如：50" value="{{formData.max}}" bindinput="handleInputChange" data-field="max"/>
+            </view>
+
+            <view class="form-group">
+                <label class="form-label">活动描述 <text class="required-mark">*</text></label>
+                <textarea name="description" class="textarea-field" placeholder="详细描述活动内容、流程、意义、对志愿者的具体要求等（至少20字）" maxlength="500" auto-height="{{true}}" value="{{formData.description}}" bindinput="handleInputChange" data-field="description"/>
+            </view>
+        </view>
+
+        <!-- 活动素材卡片 -->
+        <view class="form-section-card">
+            <text class="h3 card-title">活动素材</text>
+            <view class="form-group uploader-item">
+                <label class="form-label">活动主图 (1张) <text class="required-mark">*</text></label>
+                <view class="image-uploader-wrapper">
+                    <view class="image-preview-box" wx:if="{{tempImagePaths.mainImg}}">
+                        <image class="preview-image" src="{{tempImagePaths.mainImg}}" mode="aspectFill"/>
+                        <view class="delete-image-button" bindtap="deleteImage" data-type="mainImg">×</view>
+                    </view>
+                    <view class="upload-action-button" bindtap="chooseImage" data-type="mainImg" wx:else>
+                        <image class="upload-icon" src="/assets/svgs/icon-plus-image.svg" mode="aspectFit"/>
+                        <text>选择图片</text>
+                    </view>
+                </view>
+            </view>
+            <view class="form-group uploader-item">
+                <label class="form-label">签到二维码 (可选)</label>
+                <view class="image-uploader-wrapper">
+                    <view class="image-preview-box" wx:if="{{tempImagePaths.signInQr}}">
+                        <image class="preview-image" src="{{tempImagePaths.signInQr}}" mode="aspectFit"/> <!-- 二维码用aspectFit -->
+                        <view class="delete-image-button" bindtap="deleteImage" data-type="signInQr">×</view>
+                    </view>
+                    <view class="upload-action-button" bindtap="chooseImage" data-type="signInQr" wx:else>
+                         <image class="upload-icon" src="/assets/svgs/icon-plus-image.svg" mode="aspectFit"/>
+                         <text>选择图片</text>
+                    </view>
+                </view>
+            </view>
+             <view class="form-group uploader-item">
+                <label class="form-label">反馈问卷二维码 (可选)</label>
+                 <view class="image-uploader-wrapper">
+                    <view class="image-preview-box" wx:if="{{tempImagePaths.feedbackQr}}">
+                        <image class="preview-image" src="{{tempImagePaths.feedbackQr}}" mode="aspectFit"/>
+                        <view class="delete-image-button" bindtap="deleteImage" data-type="feedbackQr">×</view>
+                    </view>
+                    <view class="upload-action-button" bindtap="chooseImage" data-type="feedbackQr" wx:else>
+                        <image class="upload-icon" src="/assets/svgs/icon-plus-image.svg" mode="aspectFit"/>
+                        <text>选择图片</text>
+                    </view>
+                </view>
+            </view>
+        </view>
+
+        <button form-type="submit" class="btn btn-primary btn-block btn-publish-action" disabled="{{isSubmitting}}">
+            {{isSubmitting ? '正在发布...' : '确认发布活动'}}
+        </button>
+    </form>
+</view>

@@ -1,0 +1,6 @@
+{
+  "usingComponents": {},
+  "navigationBarTitleText": "手势百科",
+  "enablePullDownRefresh": true,
+  "onReachBottomDistance": 50 
+}

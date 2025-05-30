@@ -1,0 +1,81 @@
+/* pages/profile/settings/settings.wxss */
+page {
+  /* ... 全局变量 ... */
+  --page-horizontal-padding: 40rpx; /* 定义一个页面左右通用内边距变量 */
+}
+
+.settings-page-container {
+  /* 调整：左右内边距由这个容器控制 */
+  padding: 30rpx var(--page-horizontal-padding) 40rpx;
+  background-color: var(--bg-color, #F8F4F0);
+  min-height: 100vh;
+  font-family: var(--font-family);
+}
+
+.page-main-title {
+  display: block; font-size: 48rpx; font-weight: 600;
+  color: var(--text-color-dark);
+  margin-bottom: 30rpx;
+  /* 移除这里的padding，因为父容器已有 */
+  /* padding: 0 40rpx; */
+  text-align: left;
+}
+
+.settings-group {
+  background-color: white;
+  border-radius: var(--border-radius-md, 20rpx);
+  /* 调整：移除左右外边距，让它撑满父容器的padding区域 */
+  margin: 0 0 30rpx; /* 只保留下外边距 */
+  box-shadow: var(--shadow-soft, 0 4rpx 12rpx rgba(0,0,0,0.04));
+  overflow: hidden;
+  width: 100%; /* 确保它撑满 .settings-page-container 的内容宽度 */
+}
+.settings-group:last-of-type {
+  margin-bottom: 0;
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 100rpx;
+  padding: 24rpx 30rpx; /* 列表项内部的左右padding */
+  border-bottom: 1rpx solid #F0F0F0;
+  background-color: white;
+}
+.setting-item:last-child {
+  border-bottom: none;
+}
+.setting-item:active {
+  background-color: #f9f9f9;
+}
+
+.item-content { display: flex; align-items: center; }
+.item-icon { width: 40rpx; height: 40rpx; margin-right: 20rpx; opacity: 0.7; }
+.item-label { font-size: 30rpx; color: var(--text-color-dark); }
+
+.item-value-action { display: flex; align-items: center; }
+.status-text { font-size: 26rpx; margin-right: 10rpx; }
+.status-pending { color: #E6A23C; }
+.status-approved { color: var(--green-accent, #16a34a); }
+.status-rejected { color: #F56C6C; }
+.status-unverified { color: var(--text-color-light); }
+
+.text-gray { color: #999999; }
+.arrow-icon { width: 28rpx; height: 28rpx; opacity: 0.4; }
+switch { transform: scale(0.8); }
+
+.logout-button-wrapper {
+  padding: 60rpx 0 0; /* 退出按钮的上下外边距，左右由 .settings-page-container 控制 */
+  /* 移除这里的 padding-left 和 padding-right */
+}
+.btn-logout {
+  width: 100%; /* 撑满 .settings-page-container 的内容宽度 */
+  height: 88rpx; line-height: 88rpx;
+  background-color: white; color: #F56C6C;
+  border-radius: var(--border-radius-md);
+  font-size: 30rpx; font-weight: 500;
+  border: 1rpx solid #F0F0F0;
+  box-shadow: var(--shadow-soft);
+}
+.btn-logout:active { background-color: #fdf0f0; }

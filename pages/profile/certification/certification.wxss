@@ -1,0 +1,122 @@
+/* pages/profile/certification/certification.wxss */
+page {
+  --bg-color: #F8F4F0;
+  --text-color-dark: #333333;
+  --text-color-light: #666666;
+  --accent-color: #FF8C00;
+  --card-bg-solid-white: white;
+  --green-accent: #16a34a; /* 假设已定义 */
+  --yellow-accent: #E6A23C; /* 假设已定义 */
+  --red-accent: #F56C6C;   /* 假设已定义 */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+  --border-radius-sm: 16rpx;
+  --border-radius-md: 24rpx;
+  --border-radius-lg: 32rpx;
+  --shadow-soft: 0 6rpx 20rpx rgba(0, 0, 0, 0.07);
+  --page-horizontal-padding: 40rpx;
+}
+view, text, input, textarea, button, label { box-sizing: border-box; }
+
+.certification-page-container {
+  padding: 30rpx var(--page-horizontal-padding) 40rpx;
+  background-color: var(--bg-color);
+  min-height: 100vh;
+  font-family: var(--font-family);
+}
+
+.page-main-title {
+  display: block; font-size: 48rpx; font-weight: 600;
+  color: var(--text-color-dark); margin-bottom: 16rpx;
+  text-align: left;
+}
+
+/* 认证状态显示区域 */
+.certification-status-wrapper.card {
+  background: var(--card-bg-solid-white);
+  border-radius: var(--border-radius-lg);
+  padding: 30rpx;
+  margin-bottom: 40rpx; /* 与下方表单或提示的间距 */
+  box-shadow: var(--shadow-soft);
+  text-align: center;
+}
+.status-text-display {
+  display: block;
+  font-size: 32rpx; /* 状态文字大一点 */
+  font-weight: 600;
+  margin-bottom: 10rpx;
+}
+.status-remark-display {
+  font-size: 26rpx;
+  color: var(--text-color-light);
+  line-height: 1.5;
+}
+.btn-inline-login { /* 状态区域内的登录按钮 */
+  display: inline-block;
+  margin-top: 20rpx;
+  padding: 10rpx 30rpx;
+  font-size: 28rpx;
+  color: var(--accent-color);
+  border: 1rpx solid var(--accent-color);
+  border-radius: var(--border-radius-md);
+  background-color: transparent;
+}
+
+/* 表单描述文字 */
+.page-description {
+  display: block; font-size: 26rpx; color: var(--text-color-light);
+  margin-bottom: 30rpx; line-height: 1.5;
+}
+
+/* 表单卡片 */
+.card.form-card-actual {
+  background: var(--card-bg-solid-white);
+  border-radius: var(--border-radius-lg);
+  padding: 40rpx 30rpx;
+  margin-bottom: 50rpx;
+  box-shadow: var(--shadow-soft);
+}
+.form-group { margin-bottom: 30rpx; }
+.form-group:last-child { margin-bottom: 0; }
+.form-label {
+  display: block; font-size: 28rpx; color: var(--text-color-dark);
+  margin-bottom: 16rpx; font-weight: 500;
+}
+.input-field {
+  width: 100%; height: 88rpx;
+  padding: 0 24rpx;
+  border: 1rpx solid #E0E0E0;
+  border-radius: var(--border-radius-sm);
+  font-size: 28rpx;
+  background-color: #F9F9F9;
+}
+.input-field::placeholder { color: #BBBBBB; }
+
+/* 提交按钮 */
+.btn-submit-certification {
+  width: 100%; height: 90rpx; line-height: 90rpx;
+  background-color: var(--accent-color); color: white;
+  border-radius: var(--border-radius-md); font-size: 32rpx; font-weight: 500;
+  border: none; box-shadow: var(--shadow-soft);
+  /* margin-bottom: 40rpx; */ /* 如果下方还有内容 */
+}
+.btn-submit-certification[disabled] { background-color: #ccc; box-shadow: none; }
+
+/* 已认证或其他不可提交时的提示文本 */
+.already-certified-info {
+  text-align: center; padding: 30rpx 0;
+}
+.already-certified-info .p {
+  font-size: 28rpx; color: var(--text-color-light);
+}
+
+/* 加载状态占位 */
+.loading-placeholder {
+  text-align: center; padding: 100rpx 0; color: #999;
+}
+
+/* 状态文字颜色 */
+.status-unverified { color: var(--text-color-light); }
+.status-pending { color: var(--yellow-accent, #E6A23C); } /* 定义一个黄色变量 */
+.status-approved { color: var(--green-accent, #16a34a); }
+.status-rejected { color: var(--red-accent, #F56C6C); } /* 定义一个红色变量 */
+.login-required { color: var(--accent-color); } /* 提示登录的文字颜色 */
