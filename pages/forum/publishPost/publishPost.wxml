@@ -1,0 +1,29 @@
+<!-- pages/forum/publishPost/publishPost.wxml -->
+<view class="container publish-post-page">
+    <form bindsubmit="onFormSubmit">
+        <view class="form-group">
+            <input name="name" class="title-input" placeholder="请输入帖子标题 (必填)" value="{{formData.name}}" bindinput="handleInputChange" data-field="name" maxlength="50"/>
+        </view>
+        <view class="form-group">
+            <textarea name="description" class="content-textarea" placeholder="分享你的想法和问题... (必填)" value="{{formData.description}}" bindinput="handleInputChange" data-field="description" maxlength="1000" auto-height="{{true}}"></textarea>
+        </view>
+        <view class="form-group">
+            <view class="image-uploader-wrapper">
+                <!-- 图片预览 -->
+                <view class="image-preview-box" wx:for="{{tempImagePaths}}" wx:key="*this">
+                    <image class="preview-image" src="{{item}}" mode="aspectFill"/>
+                    <view class="delete-image-button" bindtap="deleteImage" data-index="{{index}}">×</view>
+                </view>
+                <!-- 上传按钮 (最多3张) -->
+                <view class="upload-action-button" bindtap="chooseImage" wx:if="{{tempImagePaths.length < 3}}">
+                    <image class="upload-icon" src="/assets/svgs/icon-plus-image.svg" mode="aspectFit"/>
+                    <text>添加图片</text>
+                </view>
+            </view>
+            <text class="p text-sm uploader-tip">最多可上传3张图片</text>
+        </view>
+        <button form-type="submit" class="btn btn-primary btn-publish-action" disabled="{{isSubmitting}}">
+            {{isSubmitting ? '发布中...' : '发 布'}}
+        </button>
+    </form>
+</view>

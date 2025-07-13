@@ -229,3 +229,34 @@ page {
   flex: 1;
   text-align: center;
 }
+.community-entry-card {
+  /* 复用 .card 样式 */
+  background-color: #ffffff; /* 论坛入口卡片可以用纯白背景，使其突出 */
+  /* 或者用一个不同的渐变色 */
+  /* background: linear-gradient(120deg, #84fab0, #8fd3f4); */
+  padding: 30rpx;
+  border: 1rpx solid #eee;
+}
+.community-entry-card .entry-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.community-entry-card .entry-text {
+  flex: 1;
+}
+.community-entry-card .entry-title { /* h3 */
+  font-size: 34rpx;
+  font-weight: 600;
+  color: var(--text-color-dark);
+  margin-bottom: 8rpx;
+}
+.community-entry-card .entry-description { /* p */
+  font-size: 26rpx;
+  color: var(--text-color-light);
+}
+.community-entry-card .entry-icon {
+  width: 80rpx;
+  height: 80rpx;
+  margin-left: 30rpx;
+}

@@ -6,11 +6,17 @@
         <image class="cart-icon" src="/assets/images/icon-cart.png" mode="aspectFit" bindtap="navigateToCart"/>
     </view>
 
-    <!-- 搜索框 -->
-    <view class="search-bar-wrapper">
+     <!-- 搜索框 -->
+     <view class="search-bar-wrapper">
         <view class="search-input-group">
             <image class="search-icon-input" src="/assets/images/icon-search.png" mode="aspectFit"/>
-            <input class="search-input" type="text" placeholder="搜索商品/手语元素..." confirm-type="search" bindconfirm="onSearchConfirm"/>
+            <input class="search-input"
+                   type="text"
+                   placeholder="搜索商品/手语元素..."
+                   confirm-type="search"
+                   value="{{searchKeyword}}"
+                   bindinput="onSearchInput"  
+                   bindconfirm="onSearchConfirm" /> <!-- **绑定确认搜索事件** -->
         </view>
     </view>
 

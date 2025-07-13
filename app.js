@@ -3,108 +3,138 @@
 // import request from './utils/request.js'; // 假设路径
 
 App({
-  onLaunch(options) {
-    console.log('App Launch options:', options);
-    const token = wx.getStorageSync('userToken');
-    const storedUserInfo = wx.getStorageSync('userInfo');
+  onLaunch() {
+    console.log("App.onLaunch: 小程序启动");
 
-    if (token && storedUserInfo && storedUserInfo.id !== undefined && storedUserInfo.id !== null) { // **更严格的id检查**
-      this.globalData.token = token;
-      this.globalData.userInfo = storedUserInfo;
-      this.globalData.isLoggedIn = true;
-      console.log('App.onLaunch: Restored login state from cache. UserID:', storedUserInfo.id);
-    } else {
-      this.globalData.isLoggedIn = false;
-      this.globalData.userInfo = null;
-      this.globalData.token = null;
-      console.log('App.onLaunch: No valid cached login state found or userInfo.id is missing.');
-    }
-    console.log('App.onLaunch - Final globalData state:', JSON.stringify(this.globalData));
-    console.log('APP_ONLAUNCH_END: Final globalData state:', JSON.stringify(this.globalData)); // **日志2**
+    // 尝试从本地缓存恢复登录状态
+    this.restoreLoginState();
+
+    // ---- 这是一个可选的、用于调试的强制模拟登录块 ----
+    // 如果你想在每次启动时都绕过真实登录，进行快速测试，可以取消下面代码的注释。
+    // 在正式测试真实登录流程时，请务必注释掉它。
+    /*
+    console.warn("APP.JS ONLAUNCH: FORCING MOCK LOGIN FOR TESTING!");
+    const mockUserInfoForTesting = {
+        id: 1, // 使用你需要的测试用户ID
+        name: "全局模拟测试用户",
+        avatarUrl: "/assets/images/avatar_placeholder.png",
+        points: 2024,
+        level: "LV.Master",
+        volunteerTitle: "五星志愿者",
+        leader_certification_status: 2 // 假设2是已认证负责人
+    };
+    const mockTokenForTesting = "THIS_IS_A_GLOBAL_MOCK_TOKEN";
+    this.loginSuccess(mockTokenForTesting, mockUserInfoForTesting);
+    */
+    // ---- 模拟登录块结束 ----
+
+
+    // 获取日志 (小程序模板自带)
+    const logs = wx.getStorageSync('logs') || []
+    logs.unshift(Date.now())
+    wx.setStorageSync('logs', logs)
+
+    // wx.login() 不应该放在 onLaunch 中强制执行，
+    // 因为用户可能已经有有效的登录态（通过缓存恢复），
+    // 应该在需要登录时（例如检查到未登录或token失效）才去调用。
   },
+
   globalData: {
     userInfo: null,
     isLoggedIn: false,
-    token: null,
+    token: null, // 用于存储后端返回的身份凭证
+    // 回调函数列表，用于处理异步登录
+    loginReadyCallback: [],
+    // 基础URL，方便所有页面和请求使用
     apiBaseUrl: 'https://222.186.168.45:8080',
-    imageBaseUrl: 'https://222.186.168.45:8080',
-    // 之前讨论过的其他全局数据，根据需要保留或移除
-    dailyChallengeUserAnswers: [],
-    dailyChallengeSummary: null,
-    mockUserCertificationStatus: { status: 0, remark: '' }, // 用于模拟认证状态
-    
-    // 你可以添加更多全局共享的数据
-    //例如：
-    // systemInfo: null, // 系统信息
-    // defaultPageSize: 10, // 列表分页的默认数量
+    // 是否需要刷新论坛列表 (发布新帖后使用)
+    needsRefreshForumList: false,
   },
 
-  // (可选) 一个全局方法示例：用于刷新用户信息（例如登录后、编辑资料后调用）
-  // 你需要确保 request.js 可以在 app.js 中被正确引入和使用，或者将 request 调用放在 Page 的 JS 中
-  // 暂时注释掉，因为直接在 app.js 中调用封装的 request 可能导致循环依赖或时机问题
-  /*
-  async fetchAndSetGlobalUserInfo(userIdToFetch) {
-    // 引入 request 的方式可能需要调整，避免循环依赖
-    // const request = require('./utils/request.js').default; // CommonJS方式，或确保ES6模块正确解析
-    // 或者，更推荐的是，这个函数应该被页面的JS调用，页面JS负责引入request
+  /**
+   * 尝试从本地缓存恢复登录状态
+   */
+  restoreLoginState: function() {
+    const token = wx.getStorageSync('userToken'); // **根据后端是否返回token来决定**
+    const userInfo = wx.getStorageSync('userInfo'); // **核心是恢复userInfo**
 
-    const userId = userIdToFetch || (this.globalData.userInfo ? this.globalData.userInfo.id : null);
-    if (!userId || !this.globalData.token) { // 需要用户ID和Token
-      console.warn("fetchAndSetGlobalUserInfo: Missing userId or token.");
-      return Promise.reject("Missing userId or token");
-    }
-
-    console.log("App.js: Attempting to refresh global user info for ID:", userId);
-    // return request({ // 假设 request 是一个返回 Promise 的函数
-    //     url: '/user/info', // 你的获取用户信息的API路径
-    //     method: 'GET',
-    //     data: { id: userId }
-    //     // header 中应该会自动带上 Token (由 request.js 处理)
-    //   })
-    //   .then(newUserInfo => {
-    //     if (newUserInfo && newUserInfo.id) {
-    //       this.globalData.userInfo = { // 确保映射正确
-    //           id: newUserInfo.id,
-    //           name: newUserInfo.nickname || "用户",
-    //           avatarUrl: newUserInfo.avatar || "/assets/images/avatar_placeholder.png",
-    //           points: newUserInfo.points !== undefined ? newUserInfo.points : 0,
-    //           level: newUserInfo.level || "",
-    //           volunteerTitle: newUserInfo.volunteer_title || "",
-    //           signInDays: newUserInfo.sign_in_days || 0,
-    //           // **根据 /user/info 返回的真实认证状态字段更新**
-    //           leader_certification_status_code: newUserInfo.leader_status_code_from_api, // 假设API字段
-    //           leader_certification_remark: newUserInfo.leader_remark_from_api,
-    //           phone_for_form_prefill: newUserInfo.phone_number_from_api // 假设API字段
-    //       };
-    //       this.globalData.isLoggedIn = true; // 既然能获取到信息，肯定是登录了
-    //       wx.setStorageSync('userInfo', this.globalData.userInfo); // 更新缓存
-    //       console.log("App.js: Global user info refreshed and cached:", this.globalData.userInfo);
-    //       return this.globalData.userInfo; // 返回更新后的用户信息
-    //     } else {
-    //       console.warn("App.js: fetchAndSetGlobalUserInfo - API returned invalid user data.");
-    //       return Promise.reject("Invalid user data from API");
-    //     }
-    //   })
-    //   .catch(err => {
-    //     console.error("App.js: Failed to refresh global user info:", err);
-    //     // 可以在这里处理token失效的情况，比如清除本地token并引导重新登录
-    //     if (err.statusCode === 401 || (err.code && err.code === YOUR_TOKEN_EXPIRED_CODE)) { // 假设有特定的token失效码
-    //         this.clearLoginStateAndGoToLogin();
-    //     }
-    //     return Promise.reject(err);
-    //   });
-    return Promise.resolve(this.globalData.userInfo); // 临时返回，避免报错
-  },
-
-  clearLoginStateAndGoToLogin: function() {
-      console.log("App.js: Clearing login state and redirecting to login page.");
-      wx.removeStorageSync('userToken');
-      wx.removeStorageSync('userInfo');
+    // **如果你的登录流程不依赖token，可以只判断userInfo**
+    if (userInfo && userInfo.id) {
+      // 假设只要有缓存的用户信息（特别是ID），就认为是已登录状态
+      // 后续的API请求会依赖request.js自动携带的token（如果存在）
+      // 如果token过期，request.js中应该有处理逻辑，并引导重新登录
+      console.log('App.js - restoreLoginState: Found cached userInfo, restoring login state.', userInfo);
+      this.globalData.isLoggedIn = true;
+      this.globalData.userInfo = userInfo;
+      this.globalData.token = token || null; // 如果有token也恢复
+    } else {
+      console.log('App.js - restoreLoginState: No valid cached userInfo found.');
       this.globalData.isLoggedIn = false;
       this.globalData.userInfo = null;
       this.globalData.token = null;
-      wx.reLaunch({ url: '/pages/auth/login/login' }); // 强制重新启动到登录页
+    }
+  },
+
+
+  /**
+   * 登录成功后调用的全局方法
+   * @param {string} token - 从后端获取的登录凭证
+   * @param {object} userInfo - 从后端获取的用户信息
+   */
+  loginSuccess: function(token, userInfo) {
+    console.log("App.js - loginSuccess called with userInfo:", userInfo, "and token:", token);
+    
+    // 更新全局状态
+    this.globalData.isLoggedIn = true;
+    this.globalData.userInfo = userInfo;
+    this.globalData.token = token || null; // 如果登录接口不返回token，这里就是null
+
+    // 将登录凭证和用户信息写入本地缓存
+    if (token) {
+      wx.setStorageSync('userToken', token);
+    }
+    wx.setStorageSync('userInfo', userInfo);
+
+    // 检查并执行所有在等待登录的回调函数
+    if (this.globalData.loginReadyCallback && this.globalData.loginReadyCallback.length > 0) {
+      console.log(`App.js - loginSuccess: Executing ${this.globalData.loginReadyCallback.length} login-ready callbacks.`);
+      this.globalData.loginReadyCallback.forEach(callback => {
+        if (typeof callback === 'function') {
+          callback(userInfo); // 将用户信息传递给回调
+        }
+      });
+      // 清空回调数组，避免重复执行
+      this.globalData.loginReadyCallback = [];
+    }
+  },
+
+  /**
+   * 全局退出登录方法
+   */
+  logout: function() {
+    console.log("App.js - logout: Clearing user session.");
+    // 清除本地缓存
+    wx.removeStorageSync('userToken');
+    wx.removeStorageSync('userInfo');
+    // 你也可以清除其他与用户相关的缓存
+    // wx.clearStorageSync(); // 这个会清除所有缓存，要谨慎使用
+
+    // 重置全局状态
+    this.globalData.isLoggedIn = false;
+    this.globalData.userInfo = null;
+    this.globalData.token = null;
+
+    // 使用 reLaunch 跳转到登录页，清空所有页面栈
+    // 确保登录页已在 app.json 中注册
+    wx.reLaunch({
+      url: '/pages/auth/login/login',
+      fail: (err) => {
+        console.error("Failed to reLaunch to login page after logout:", err);
+        // 如果失败，尝试跳转到首页
+        wx.switchTab({
+          url: '/pages/learner/home/home'
+        });
+      }
+    });
   }
-  */
- 
-});
+})

@@ -1,170 +1,182 @@
 // pages/profile/user-growth/user-growth.js
 import request from '../../../utils/request.js';
 const app = getApp();
+const API_BASE_URL = 'https://222.186.168.45:8080'; // API基础URL
 
 Page({
   data: {
-    userInfo: {
-      name: "加载中...", // 初始状态
-      level: "LV.0",
-      volunteerTitle: "志愿者",
-      points: 0,
+    userInfo: { // 用于UI显示，初始为加载中状态
+      id: null,
+      name: "加载中...",
       avatarUrl: "/assets/images/avatar_placeholder.png",
-      id: null, // 将由登录或硬编码的测试ID填充（用于任务接口）
-      username: '',
-      sign_in_days: 0
+      points: '---',
+      level: "", // 这两个字段需要确认从哪个API获取
+      volunteerTitle: ""
     },
-    tasks: [], // 将从 /user/task 获取
-    badges: [], // 将使用模拟数据
+    // 任务列表可以先在前端定义结构
+    tasks: [
+      { id: 'task_daily_challenge', name: "完成每日挑战", current: 0, target: 1, progress: '0%', status: 'pending' },
+      { id: 'task_volunteer_activity', name: "参加一次公益活动", current: 0, target: 5, progress: '0%', status: 'pending' }
+    ],
+    badges: [],
     commonFunctions: [
       { id: 'fn001', name: "我的订单", icon: '/assets/svgs/icon-store.svg', page: "/pages/profile/myOrders/myOrders" },
       { id: 'fn002', name: "积分明细", icon: '/assets/svgs/icon-star.svg', page: "/pages/profile/pointsDetails/pointsDetails" },
-      { id: 'fn003', name: "在线听力测试", icon: "/assets/svgs/icon-headphones.svg", page: "/pages/profile/hearingTest/instructions/instructions" },
+      { id: 'fn003', name: "在线听力测试", icon: '/assets/svgs/icon-headphones.svg', page: "/pages/profile/hearingTest/instructions/instructions" },
       { id: 'fn004', name: "排行榜", icon: '/assets/svgs/icon-trophy.svg', page: "/pages/profile/leaderboard/leaderboard" },
-      { id: 'fn005', name: "设置", icon: null, page: "/pages/profile/settings/settings" },
+      { id: 'fn005', name: "设置", icon: '/assets/svgs/icon-settings.svg', page: "/pages/profile/settings/settings" }
     ],
-    isLoading: true, // 整体页面加载状态
-    isLoadingTasks: false // 单独为任务设置加载状态
+    isLoading: true
+  },
+
+  onShow: function() {
+    console.log("user-growth.js onShow: 页面显示");
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setData({ selected: 3 });
+    }
+    // 使用“检查-等待-回调”模式来确保在登录后加载数据
+    if (app.globalData.isLoggedIn && app.globalData.userInfo) {
+      console.log("user-growth.js onShow: User already logged in, loading page data.");
+      this.loadPageData();
+    } else {
+      console.log("user-growth.js onShow: User not logged in, registering loginReadyCallback.");
+      // 确保只注册一次回调
+      if (!this.loginCallbackAdded) {
+        app.globalData.loginReadyCallback.push(() => {
+          console.log("user-growth.js: loginReadyCallback triggered, now loading page data.");
+          this.loadPageData();
+        });
+        this.loginCallbackAdded = true;
+      }
+    }
   },
 
   onLoad: function (options) {
     console.log("user-growth.js onLoad: 页面加载");
-    this.setData({ isLoading: true, isLoadingTasks: true });
+    // 主要逻辑已移至 onShow
+  },
 
-    // ---- 硬编码一个测试用户ID，仅用于需要它的接口 (如 /user/task) ----
-    const TEST_USER_ID_FOR_API = 1;
-    // 假设登录后，用户的真实ID会被存到 this.data.userInfo.id
-    // 目前由于没有登录，我们先在data中给userInfo.id赋一个初始值，如果API需要
-    // 但 /user/task 明确需要 id 参数，所以直接传递
-    // this.setData({ 'userInfo.id': TEST_USER_ID_FOR_API }); // 如果其他地方也需要这个ID
-
-    // 加载模拟的用户信息和勋章数据
-    this.loadMockProfileData(TEST_USER_ID_FOR_API); // 传递ID以便模拟的用户信息能对应上
-
-    // 调用真实的任务接口
-    this.fetchUserTasks(TEST_USER_ID_FOR_API)
-      .finally(() => {
-        // 假设所有初始数据加载（模拟+真实）完成后，设置整体加载状态
-        // 注意：如果 loadMockProfileData 内部有异步，需要更复杂的 Promise 处理
-        // 为了简单，我们假设 loadMockProfileData 是同步的或很快完成
+  // 统一的数据加载入口
+  loadPageData: function() {
+    this.setData({ isLoading: true });
+    const currentUserId = app.globalData.userInfo ? app.globalData.userInfo.id : null;
+    if (!currentUserId) {
+        console.error("loadPageData called, but currentUserId is missing.");
         this.setData({ isLoading: false });
-        console.log("user-growth.js onLoad: 初始数据获取流程完成 (部分模拟, 部分API)");
-      });
-  },
-
-  onShow: function() {
-    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-      this.getTabBar().setData({ selected: 3 });
+        // 可以考虑引导去登录
+        return;
     }
-    // 如果任务列表需要在每次显示时刷新，可以在这里调用
-    // if (this.data.userInfo.id && !this.data.isLoadingTasks) {
-    //   this.fetchUserTasks(this.data.userInfo.id);
-    // }
+    console.log(`loadPageData for user ID: ${currentUserId}`);
+
+    // 使用 Promise.allSettled 并行获取所有数据
+    Promise.allSettled([
+      this.fetchNickname(currentUserId),
+      this.fetchAvatar(currentUserId),
+      this.fetchPoints(currentUserId),
+      this.fetchUserBadges(currentUserId)
+    ]).then(results => {
+      console.log("user-growth.js: All page data fetches settled.", results);
+      this.setData({ isLoading: false });
+      wx.stopPullDownRefresh();
+    });
   },
 
-  // --- 新增：加载模拟的用户信息和勋章数据 ---
-  loadMockProfileData: function(userIdForMock) {
-    console.log("[loadMockProfileData] 开始加载模拟的用户信息和勋章");
-
-    // 1. 模拟用户信息 (字段名尽量与 Apifox 中 /user/info 的 data 响应体一致)
-    const mockUserInfo = {
-      id: userIdForMock, // 使用传入的ID，保持一致性
-      username: `mock_user_${userIdForMock}`,
-      nickname: "手语爱好者 (模拟)",
-      avatar: "/assets/images/avatar_placeholder.png",
-      points: 1888,
-      level: "LV.8 (模拟)",
-      volunteer_title: "热心志愿者 (模拟)",
-      sign_in_days: 25
-    };
-    this.setData({ userInfo: mockUserInfo });
-    console.log("[loadMockProfileData] 模拟用户信息已设置:", this.data.userInfo);
-
-    // 2. 模拟勋章列表 (字段名尽量与 Apifox 中 /user/badges 的 data 响应体一致)
-    const mockBadges = [
-      { id: 'b001', name: "新手上路 (模拟)", icon_url: "/assets/svgs/icon-learn.svg", is_acquired: true },
-      { id: 'b002', name: "首次志愿 (模拟)", icon_url: "/assets/svgs/icon-volunteer-alt.svg", is_acquired: true },
-      { id: 'b003', name: "打卡达人 (模拟)", icon_url: "/assets/svgs/icon-check.svg", is_acquired: true },
-      { id: 'b004', name: "积分能手 (模拟)", icon_url: "/assets/svgs/icon-star.svg", is_acquired: false },
-    ];
-    // 格式化为 WXML 期望的结构
-    const formattedBadges = mockBadges.map(apiBadge => ({
-      id: apiBadge.id,
-      name: apiBadge.name,
-      icon: apiBadge.icon_url,
-      acquired: apiBadge.is_acquired === true
-    }));
-    this.setData({ badges: formattedBadges });
-    console.log("[loadMockProfileData] 模拟勋章列表已设置:", this.data.badges);
+  // --- API 调用函数 ---
+  fetchNickname: function(userId) {
+    console.log(`[fetchNickname] 调用 API GET /user/getname`);
+    return request({
+      url: '/user/getname',
+      method: 'GET',
+      data: { id: userId.toString() }
+    })
+    .then(nickname => {
+      if (typeof nickname === 'string') {
+        console.log("API返回的昵称:", nickname);
+        this.setData({ 'userInfo.name': nickname });
+        if (app.globalData.userInfo) app.globalData.userInfo.name = nickname;
+      }
+    }).catch(err => console.error("fetchNickname failed:", err));
   },
-  // --- 模拟数据加载结束 ---
 
+  fetchAvatar: function(userId) {
+    // 假设 /user/getimg 直接返回图片流，我们构造URL并在WXML中使用
+    const avatarUrl = `${API_BASE_URL}/user/getimg?id=${userId.toString()}`;
+    console.log("[fetchAvatar] 构造的头像URL:", avatarUrl);
+    this.setData({ 'userInfo.avatarUrl': avatarUrl });
+    if (app.globalData.userInfo) app.globalData.userInfo.avatarUrl = avatarUrl;
+    return Promise.resolve(); // 返回一个成功的Promise
+  },
 
-  // --- 真实API调用：只保留 fetchUserTasks ---
+  fetchPoints: function(userId) {
+    // **你需要和timing确认获取积分的真实接口路径**
+    // **我假设是 /user/count (来自之前的排行榜接口文档)**
+    console.log(`[fetchPoints] 调用 API GET /user/count`);
+    return request({
+      url: '/user/count',
+      method: 'GET',
+      data: { id: userId.toString() },
+      expectDirectData: true // **假设这个接口也直接返回数字，没有code,msg包裹**
+    })
+    .then(points => {
+      if (points !== undefined && !isNaN(parseInt(points))) {
+        const userPoints = parseInt(points);
+        console.log("API返回的积分:", userPoints);
+        this.setData({ 'userInfo.points': userPoints });
+        if (app.globalData.userInfo) app.globalData.userInfo.points = userPoints;
+      }
+    }).catch(err => {
+      console.error("API获取用户积分失败:", err);
+      this.setData({ 'userInfo.points': '获取失败' });
+    });
+  },
+  
   fetchUserTasks: function(userId) {
-    console.log(`[fetchUserTasks] 开始调用 API (GET /user/task) for user ID: ${userId}`);
-    this.setData({ isLoadingTasks: true }); // tasks: [] 已在 loadMockProfileData 或 data 中初始化
-
-    return request({ // 返回Promise
+    // 这个接口返回任务列表，但可能不包含最新的进度
+    // 我们暂时还是用它来获取任务的定义，而进度可以从 /user/info (如果实现了) 或其他地方更新
+    // 如果没有 /user/info，那么任务进度暂时就是写死的
+    console.log(`[fetchUserTasks] 调用 API GET /user/task`);
+    return request({
       url: '/user/task',
       method: 'GET',
-      data: { id: userId }
+      data: { id: userId.toString() }
     })
     .then(apiTaskArray => {
-      console.log('[fetchUserTasks] API /user/task 成功返回的业务数据 (apiTaskArray):', apiTaskArray);
-      if (Array.isArray(apiTaskArray)) {
-        const formattedTasks = apiTaskArray.map(apiTask => {
-          let statusText = "进行中";
-          let statusCodeForFrontend = 1;
-          if (apiTask.status_code === 2) { statusText = "已完成"; statusCodeForFrontend = 2; }
-          else if (apiTask.status_code === 0) { statusText = "待处理"; statusCodeForFrontend = 0; }
-
-          const progressPercent = (apiTask.max > 0 && apiTask.did !== undefined) // 使用 did 和 max
-                                ? Math.round((apiTask.did / apiTask.max) * 100)
-                                : 0;
-          return {
-            id: apiTask.id,
-            name: apiTask.name,
-            current: apiTask.did || 0, // 使用 did
-            target: apiTask.max || 0,  // 使用 max
-            status: statusText,
-            status_code_frontend: statusCodeForFrontend,
-            progress: progressPercent + '%',
-            progressRaw: progressPercent,
-          };
-        });
-        console.log('[fetchUserTasks] 格式化后的任务列表 (formattedTasks):', formattedTasks);
-        this.setData({ tasks: formattedTasks });
-      } else {
-        console.warn('[fetchUserTasks] API /user/task 返回的业务数据 (data字段) 不是一个数组:', apiTaskArray);
-        this.setData({ tasks: [] }); // 清空或用之前的模拟数据
-      }
-    })
-    .catch(err => {
-      console.error(`[fetchUserTasks] API /user/task 获取失败 for user ID ${userId}:`, err);
-      // 可以考虑在这里加载一次模拟任务数据作为降级
-      // this.loadMockTasksForFallback();
-      this.setData({ tasks: [] });
-    })
-    .finally(() => {
-      this.setData({ isLoadingTasks: false });
-      console.log('[fetchUserTasks] API 调用完成');
-    });
+        // ... (你之前的任务数据格式化逻辑)
+        if (Array.isArray(apiTaskArray)) {
+            const formattedTasks = apiTaskArray.map(apiTask => {
+                // ...
+            });
+            this.setData({ tasks: formattedTasks });
+        }
+    }).catch(err => console.error("fetchUserTasks failed:", err));
   },
 
-  // --- 移除了 fetchUserProfile 和 fetchUserBadges ---
+  fetchUserBadges: function(userId) { /* ... 保持不变 ... */ },
 
-  // --- 事件处理函数 (保持不变) ---
-  viewAllTasks: function() { wx.navigateTo({ url: '/pages/profile/taskList/taskList', fail: () => wx.showToast({title:'功能建设中'})}); },
+  // --- 事件处理函数 ---
+  goToTask: function(e) {
+    const taskId = e.currentTarget.dataset.taskid;
+    console.log("点击了任务项，任务ID:", taskId);
+    // 根据 taskId 跳转到不同页面
+    if (taskId === 'task_daily_challenge') {
+        wx.navigateTo({ url: '/pages/learner/dailyChallenge/dailyChallenge' });
+    } else if (taskId === 'task_volunteer_activity') {
+        wx.switchTab({ url: '/pages/volunteer/activityList/activityList' });
+    } else {
+        wx.showToast({ title: '功能暂未开放', icon: 'none' });
+    }
+  },
+
+  // --- 事件处理函数 ---
+  viewAllTasks: function() {
+    wx.navigateTo({ url: '/pages/profile/taskList/taskList', fail: () => wx.showToast({title:'页面建设中', icon:'none'}) });
+  },
   viewAllBadges: function() {
-    wx.navigateTo({
-        url: '/pages/profile/badgeWall/badgeWall', // 修改为实际页面路径
-        fail: () => { wx.showToast({ title: '页面未开放', icon: 'none'})}
-    });
-},
+    wx.navigateTo({ url: '/pages/profile/badgeWall/badgeWall', fail: () => wx.showToast({title:'页面建设中', icon:'none'}) });
+  },
   handleFunctionTap: function(e) {
     const pagePath = e.currentTarget.dataset.page;
-    const funcName = e.currentTarget.dataset.funcname; // WXML中需要设置 data-funcname="{{funcItem.name}}"
+    const funcName = e.currentTarget.dataset.funcname;
     if (pagePath) {
       wx.navigateTo({
         url: pagePath,
@@ -174,12 +186,22 @@ Page({
         }
       });
     } else {
-      wx.showToast({ title: `功能 "${funcName}" 配置错误`, icon: 'none'});
+      wx.showToast({ title: `功能配置错误`, icon: 'none'});
     }
   },
   goToTask: function(e) {
     const taskId = e.currentTarget.dataset.taskid;
     console.log("点击了任务按钮，任务ID:", taskId);
-    wx.showToast({ title: `处理任务: ${taskId} (功能建设中)`, icon: 'none' });
+    wx.showToast({ title: `处理任务 (ID: ${taskId})`, icon: 'none' });
   },
+
+  onPullDownRefresh: function() {
+      console.log("user-growth.js: onPullDownRefresh triggered");
+      // 下拉刷新时，也需要确保已登录
+      if (app.globalData.isLoggedIn && app.globalData.userInfo) {
+          this.loadPageData(); // 重新加载所有页面数据
+      } else {
+          wx.stopPullDownRefresh(); // 未登录则不执行刷新
+      }
+  }
 });

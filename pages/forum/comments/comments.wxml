@@ -1,0 +1,78 @@
+<!-- pages/forum/comments/comments.wxml -->
+<view class="page-container comments-page-container">
+    <!-- 帖子概要信息 (可选，可以从上个页面传递或单独请求) -->
+    <view class="original-post-summary-card" wx:if="{{postInfo}}">
+        <view class="author-info">
+            <image class="author-avatar" src="{{postInfo.authorAvatar || '/assets/images/avatar_placeholder.png'}}" mode="aspectFill"/>
+            <view class="author-details">
+                <text class="author-name text-dark">{{postInfo.authorName}}</text>
+                <!-- <text class="post-timestamp text-sm">{{postInfo.createTimeFormatted}}</text> -->
+            </view>
+        </view>
+        <text class="p post-title font-bold">{{postInfo.title}}</text>
+    </view>
+    
+    <!-- 评论列表的滚动区域 -->
+    <scroll-view scroll-y="true" class="comments-scroll-view"
+                 bindscrolltolower="onReachBottom"
+                 refresher-enabled="true"
+                 refresher-triggered="{{isPullingDown}}"
+                 bindrefresherrefresh="onPullDownRefresh">
+
+        <text class="h3 comments-section-title" wx:if="{{totalComments > 0}}">全部评论 ({{totalComments}})</text>
+        
+        <view class="comments-list" wx:if="{{comments.length > 0}}">
+            <view class="comment-item" wx:for="{{comments}}" wx:key="id">
+                <image class="commenter-avatar" src="{{item.authorAvatar}}" mode="aspectFill"/>
+                <view class="comment-content-wrapper">
+                    <view class="comment-header">
+                        <text class="commenter-name text-dark">{{item.authorName}}</text>
+                        <text class="comment-timestamp text-sm">{{item.createTimeFormatted}}</text>
+                         <!-- **新增：删除按钮** -->
+            <text class="delete-comment-btn text-sm"
+                  wx:if="{{item.authorId === currentUserId}}"
+                  catchtap="handleDeleteComment" data-commentid="{{item.id}}" data-index="{{index}}">
+                删除
+            </text>
+                    </view>
+                    <text class="p comment-text" selectable="{{true}}">{{item.content}}</text>
+                    <view class="comment-actions">
+                        <view class="action-item like-action {{item.isLiked ? 'active' : ''}}"
+                              catchtap="handleLikeComment" data-commentid="{{item.id}}" data-index="{{index}}">
+                            <image class="action-icon" src="{{item.isLiked ? '/assets/svgs/icon-like-filled.svg' : '/assets/svgs/icon-like.svg'}}" mode="aspectFit"/>
+                            <text class="action-count text-sm">{{item.likeCount}}</text>
+                        </view>
+                        <!-- 可以增加回复功能 -->
+                    </view>
+                </view>
+            </view>
+        </view>
+
+        <view wx:if="{{comments.length === 0 && !isLoading && !firstLoad}}" class="empty-state">
+            <text>还没有评论，快来抢个沙发吧！</text>
+        </view>
+
+        <view wx:if="{{!hasMoreComments && comments.length > 0}}" class="no-more-comments">
+            <text>~ 没有更多评论了 ~</text>
+        </view>
+    </scroll-view>
+
+    <!-- 底部评论输入栏 -->
+    <view class="comment-input-bar">
+        <view class="input-wrapper">
+            <input class="comment-input-field"
+                   placeholder="发表你的看法..."
+                   value="{{myCommentText}}"
+                   bindinput="onCommentInput"
+                   confirm-type="send"
+                   bindconfirm="submitComment"
+                   adjust-position="{{true}}"
+                   cursor-spacing="20"/>
+        </view>
+        <button class="btn btn-sm btn-submit-comment"
+                bindtap="submitComment"
+                disabled="{{isCommentInputEmpty || isSubmittingComment}}">
+            {{isSubmittingComment ? '...' : '发送'}}
+        </button>
+    </view>
+</view>

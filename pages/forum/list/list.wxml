@@ -1,0 +1,77 @@
+<!-- pages/forum/list/list.wxml -->
+<view class="container forum-list-page-container">
+    <scroll-view scroll-y="true" class="posts-scroll-view"
+                 bindscrolltolower="onReachBottom"
+                 refresher-enabled="true"
+                 refresher-triggered="{{isPullingDown}}"
+                 bindrefresherrefresh="onPullDownRefresh">
+        <block wx:if="{{posts.length > 0}}">
+            <view class="post-list">
+                <view class="card post-card-item" wx:for="{{posts}}" wx:key="id">
+                    <!-- 作者信息 -->
+                    <view class="post-author-info">
+                        <image class="author-avatar" src="{{item.authorAvatar}}" mode="aspectFill"/>
+                        <view class="author-details">
+                            <text class="author-name text-dark">{{item.authorName}}</text>
+                            <text class="post-timestamp text-sm">{{item.createTimeFormatted}}</text>
+                        </view>
+                        <!-- **新增：删除按钮，仅当帖子作者ID与当前登录用户ID相同时显示** -->
+        <view class="post-menu-button" wx:if="{{item.authorId === currentUserId}}"
+              catchtap="handleDeletePost" data-postid="{{item.id}}" data-index="{{index}}">
+            <image class="delete-icon" src="/assets/svgs/icon-delete-post.svg" mode="aspectFit"/>
+        </view>
+                    </view>
+                    <!-- 帖子内容 (现在是完整内容) -->
+                    <view class="post-content" bindtap="navigateToComments" data-postid="{{item.id}}"> <!-- 点击内容区也可以进评论 -->
+                        <text class="p post-title font-bold" wx:if="{{item.title}}">{{item.title}}</text>
+                        <text class="p post-full-content" selectable="{{true}}">{{item.contentSummary}}</text> <!-- 使用 selectable 让用户可复制 -->
+                    </view>
+                    <!-- 帖子图片 (简化版，只显示第一张或网格显示) -->
+                    <view class="post-images-grid" wx:if="{{item.images && item.images.length > 0}}">
+                        <view class="image-wrapper {{item.images.length === 1 ? 'single' : (item.images.length === 2 || item.images.length === 4 ? 'double' : 'triple')}}">
+                            <image wx:for="{{item.images}}" wx:for-item="imgSrc" wx:key="*this"
+                                   class="post-image" src="{{imgSrc}}" mode="aspectFill" catchtap="previewImage" data-images="{{item.images}}" data-current="{{imgSrc}}"/>
+                        </view>
+                    </view>
+                    <!-- 评论预览区 -->
+                    <view class="post-comment-preview" wx:if="{{item.commentCount > 0}}" bindtap="navigateToComments" data-postid="{{item.id}}">
+                        <block wx:if="{{item.previewComments && item.previewComments.length > 0}}">
+                            <view class="comment-item" wx:for="{{item.previewComments}}" wx:for-item="comment" wx:key="id">
+                                <text class="comment-author font-bold">{{comment.authorName}}:</text>
+                                <text class="comment-content">{{comment.content}}</text>
+                            </view>
+                        </block>
+                        <text class="p text-sm view-all-comments-link">
+                            查看全部 {{item.commentCount}} 条评论 >
+                        </text>
+                    </view>
+                    <!-- 帖子底部操作/统计 -->
+                    <view class="post-actions-bar">
+                        <view class="actions-right-group">
+                             <view class="action-item comment-action" bindtap="navigateToComments" data-postid="{{item.id}}">
+                                <image class="action-icon" src="/assets/svgs/icon-comment.svg" mode="aspectFit"/>
+                                <text class="action-count text-sm">{{item.commentCount}}</text>
+                            </view>
+                            <view class="action-item like-action {{item.isLikedByCurrentUser ? 'active' : ''}}"
+                                catchtap="handleLikePost" data-postid="{{item.id}}" data-index="{{index}}">
+                                <image class="action-icon" src="{{item.isLikedByCurrentUser ? '/assets/svgs/icon-like-filled.svg' : '/assets/svgs/icon-like.svg'}}" mode="aspectFit"/>
+                                <text class="action-count text-sm">{{item.likeCount}}</text>
+                            </view>
+                        </view>
+                    </view>
+                </view>
+            </view>
+            <view wx:if="{{!hasMoreData && posts.length > 0}}" class="no-more-posts">
+                <text>~ 暂时没有更多帖子了 ~</text>
+            </view>
+        </block>
+        <view wx:else class="empty-state">
+            <text>还没有人发帖，快来抢占第一个吧！</text>
+        </view>
+    </scroll-view>
+
+    <!-- 发布新帖按钮 -->
+    <view class="publish-post-fab" bindtap="navigateToPublishPost">
+        <image class="fab-icon" src="/assets/svgs/icon-edit-pen.svg" mode="aspectFit"/>
+    </view>
+</view>

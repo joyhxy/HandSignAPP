@@ -27,34 +27,31 @@
     </view>
   </view>
 
-  <!-- 我的任务 -->
-  <view class="module-card glass-card-base">
+    <!-- 我的任务 -->
+    <view class="module-card glass-card-base">
     <h3 class="module-title text-dark font-bold mb-10">我的任务</h3>
+    <!-- **为整个任务项添加 bindtap** -->
     <block wx:for="{{tasks}}" wx:key="id">
-      <view class="task-item-container">
+      <view class="task-item-container" bindtap="goToTask" data-taskid="{{item.id}}" hover-class="item-hover">
         <view class="task-item flex-between items-center mb-10">
           <text class="task-name text-dark">{{item.name}} ({{item.current}}/{{item.target}})</text>
-          <view class="tag {{item.status === 'completed' ? 'task-status-completed' : ''}}">
+          <!-- **这里显示状态文本，而不是按钮** -->
+          <view class="tag {{item.status === 'completed' ? 'task-status-completed' : (item.status === 'pending' ? 'task-status-pending' : '')}}">
             {{item.status === 'completed' ? '已完成' : (item.status === 'pending' ? '去做任务' : '进行中')}}
           </view>
         </view>
         <view class="progress-bar mb-10">
-          <view class="progress-bar-inner" style="width: {{item.progress}}">
-          </view>
+          <view class="progress-bar-inner" style="width: {{item.progress}}"></view>
         </view>
-        <button
-  wx:if="{{item.status === 'pending'}}"
-  class="btn-go-task btn-primary-base btn-sm-base"
-  style="padding: 8rpx 20rpx; font-size: 24rpx; margin-top: -10rpx; margin-bottom: 10rpx;"
-  data-taskid="{{item.id}}"
-  bindtap="goToTask"
->去做任务</button>
+        <!-- **已删除 <button wx:if="{{item.status === 'pending'}}"> ... </button> ** -->
       </view>
+      <view wx:if="{{index < tasks.length - 1}}" class="hr-line-task"></view>
     </block>
     <view class="text-right mt-10" bindtap="viewAllTasks">
       <text class="text-accent text-sm link-text">查看全部任务 ></text>
     </view>
   </view>
+
 
   <!-- 我的勋章墙 -->
   <view class="module-card glass-card-base">

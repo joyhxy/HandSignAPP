@@ -1,164 +1,175 @@
 /* pages/learner/gestureDetails/gestureDetails.wxss */
-/* 引入或复用全局变量和样式 */
-page { /* ... 与 home.wxss 中 page 类似的变量定义 ... */ }
-.details-container { /* ... 与 home.wxss 中 .container 类似 ... */
-    padding: 40rpx;
-    padding-bottom: 160rpx; /* 为底部按钮留空间 */
+page {
+  --bg-color: #F8F4F0;
+  --text-color-dark: #333333;
+  --text-color-light: #666666;
+  --accent-color: #FF8C00;
+  --card-bg-solid-white: white;
+  --font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+  --border-radius-sm: 12rpx;
+  --border-radius-md: 20rpx;
+  --border-radius-lg: 32rpx;
+  --shadow-soft: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
+  --placeholder-bg: #EFEFEF;
+  --placeholder-text-color: #B0B0B0;
+  --page-horizontal-padding: 40rpx;
+}
+view, text, button, image, video, label, picker { box-sizing: border-box; }
+
+.details-page-container {
+  padding: 0; /* **移除最外层容器的左右padding** */
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
+  background-color: var(--bg-color, #F8F4F0);
+  min-height: 100vh;
 }
 
-/* 通用卡片标题 */
-.card-title { /* h3 */
-    display: block;
-    margin-bottom: 20rpx;
-    font-size: 36rpx;
-    font-weight: 600;
-    color: var(--text-color-dark);
+/* --- 媒体展示区 (修改) --- */
+.media-container {
+  width: 100%;
+  background-color: #000000;
+  /* 不再设置固定高度，让内容自动撑开 */
 }
+
+.gesture-video {
+  width: 100%;
+  height: 450rpx; /* 给视频一个固定的高度 */
+  display: block; /* 确保是块级元素 */
+}
+.gesture-image {
+  width: 100%;
+  /* height 不设置，让 mode="aspectFit" 或 mode="widthFix" 自动计算高度 */
+  display: block; /* 确保是块级元素 */
+  background-color: #000; /* 图片背景也是黑的 */
+}
+
+/* 如果视频和图片都存在，它们之间需要一些间距 */
+.gesture-video + .gesture-image {
+  margin-top: 10rpx; /* 在视频和图片之间加一点间距 */
+}
+
 
 .media-placeholder {
-    width: 100%;
-    min-height: 440rpx; /* UI稿 220px */
-    background-color: var(--placeholder-bg);
-    border-radius: var(--border-radius-lg);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 30rpx; /* UI稿 mb-20 */
-    color: var(--placeholder-text);
-    overflow: hidden; /* 确保图片圆角生效 */
+  width: 100%;
+  height: 450rpx; /* 占位符也需要一个高度 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  color: #888888;
 }
-.media-placeholder .gesture-image {
-    width: 100%;
-    height: 100%; /* 或者具体高度，取决于mode */
-}
-.media-placeholder .placeholder-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
-.media-placeholder .play-icon {
-    width: 80rpx;
-    height: 80rpx;
-    margin-bottom: 10rpx;
+.media-placeholder .placeholder-icon {
+  width: 100rpx;
+  height: 100rpx;
+  opacity: 0.5;
+  margin-bottom: 20rpx;
 }
 
-.info-card { /* card */
-    /* ... card基本样式 ... */
-    margin-bottom: 30rpx;
-}
-.info-card .title-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline; /* 名字和翻译基线对齐 */
-    margin-bottom: 20rpx; /* UI稿 mb-10 */
-}
-.info-card .gesture-name { /* h1 */
-    font-size: 52rpx; /* UI稿 26px */
-    margin-bottom: 0;
-    color: var(--text-color-dark);
-}
-.info-card .gesture-translation { /* text-accent font-bold */
-    font-size: 28rpx;
-    color: var(--accent-color);
-    font-weight: 600;
-}
-.tags-section .tag {
-    display: inline-block;
-    background-color: rgba(255, 140, 0, 0.1);
-    color: var(--accent-color);
-    padding: 6rpx 16rpx; /* UI稿 3px 8px */
-    border-radius: var(--border-radius-sm);
-    font-size: 20rpx; /* UI稿 10px */
-    font-weight: 500;
-    margin-right: 10rpx;
-    margin-bottom: 10rpx;
+/* --- 内容区 --- */
+.content-wrapper {
+  /* **在这里设置内容的左右内边距** */
+  padding: 0 var(--page-horizontal-padding); /* 左右 40rpx */
+  position: relative;
+  z-index: 10;
 }
 
-.description-card, .usage-card, .confusing-gestures-card { /* card */
-    /* ... card基本样式 ... */
-    margin-bottom: 30rpx;
+/* --- 通用卡片样式 --- */
+.card {
+  background-color: var(--card-bg-solid-white);
+  border-radius: var(--border-radius-lg);
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: var(--shadow-soft);
+  width: 100%;
 }
-.description-card .description-step {
-    margin-bottom: 10rpx;
-}
-.description-card .description-step:last-child {
-    margin-bottom: 0;
+.card:last-child {
+  margin-bottom: 0;
 }
 
-.usage-list .usage-item {
-    display: flex;
-    margin-bottom: 10rpx;
+.info-card { /* 第一个卡片，向上叠加 */
+  margin-top: -60rpx;
+  position: relative;
+  z-index: 10;
 }
-.usage-list .list-dot {
-    margin-right: 10rpx;
-    color: var(--text-color-light);
+
+.card-section-title { /* h3 */
+  display: block; font-size: 34rpx; font-weight: 600;
+  color: var(--text-color-dark); margin-bottom: 24rpx;
 }
-.usage-list .p { /* 已有全局样式 */ }
+
+/* --- 信息卡片 --- */
+.title-section {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 20rpx;
+}
+.gesture-name { /* h1 */
+  font-size: 52rpx; font-weight: 600; color: var(--text-color-dark);
+}
+.gesture-translation { font-size: 28rpx; color: var(--accent-color); font-weight: 500; }
+.tags-section { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.tag {
+  background-color: rgba(255, 140, 0, 0.08); color: var(--accent-color);
+  padding: 6rpx 16rpx; border-radius: var(--border-radius-sm);
+  font-size: 22rpx; font-weight: 500;
+}
+
+/* --- 描述、用法、易混淆卡片 --- */
+.description-step, .usage-item {
+  display: flex;
+  font-size: 28rpx; color: var(--text-color-light);
+  line-height: 1.7; margin-bottom: 10rpx;
+}
+.description-step:last-child, .usage-item:last-child { margin-bottom: 0; }
+.list-dot { margin-right: 16rpx; }
+
 .dialogue-example {
-    margin-top: 20rpx;
-    padding-left: 20rpx; /* 缩进对话 */
-    border-left: 4rpx solid var(--accent-color-light, rgba(255,140,0,0.3));
+  margin-top: 24rpx; padding-top: 20rpx;
+  border-top: 1rpx solid #f0f0f0;
 }
-.dialogue-example .dialogue-line {
-    margin-bottom: 5rpx;
-}
+.dialogue-title { font-weight: 500; color: var(--text-color-dark); }
+.dialogue-line { margin-top: 8rpx; padding-left: 20rpx; }
 
-
-.confusing-gestures-card .confusing-item {
-    display: flex;
-    align-items: flex-start; /* 顶部对齐 */
-    gap: 20rpx; /* 如果不支持，用margin */
-    margin-bottom: 20rpx;
+.confusing-item {
+  display: flex; align-items: center; gap: 20rpx;
+  margin-bottom: 20rpx;
 }
-.confusing-gestures-card .confusing-item:last-child {
-    margin-bottom: 0;
-}
+.confusing-item:last-child { margin-bottom: 0; }
 .confusing-media-placeholder {
-    width: 160rpx;  /* UI稿 80px */
-    height: 120rpx; /* UI稿 60px */
-    min-width: 160rpx; /* 防止被压缩 */
-    background-color: var(--placeholder-bg);
-    border-radius: var(--border-radius-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20rpx; /* UI稿 10px */
-    color: var(--placeholder-text);
-    text-align: center;
-    overflow: hidden;
+  width: 160rpx; height: 120rpx; flex-shrink: 0;
+  background-color: var(--placeholder-bg); border-radius: var(--border-radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22rpx; color: var(--placeholder-text-color); text-align: center;
 }
-.confusing-media-placeholder image {
-    width: 100%;
-    height: 100%;
-}
-.confusing-gestures-card .confusing-description { /* p text-sm */
-    font-size: 24rpx;
-    color: var(--text-color-light);
-    line-height: 1.4; /* 调整行高让文字不拥挤 */
+.confusing-media-placeholder image { width: 100%; height: 100%; }
+.confusing-description { /* p text-sm */
+  font-size: 24rpx; color: var(--text-color-light); line-height: 1.5;
+  flex-grow: 1;
 }
 
-
-.action-buttons {
-    display: flex;
-    gap: 30rpx; /* UI稿 gap-15 (15px) */
-    margin-top: 40rpx; /* UI稿 mt-20 */
-    /* 如果要让按钮固定在底部，需要用 position: fixed 等，但这里是随内容滚动 */
+/* --- 底部固定操作栏 --- */
+.bottom-action-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  padding: 20rpx 40rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  background: white; /* 底部栏用不透明白色 */
+  border-top: 1rpx solid #f0f0f0;
+  display: flex; gap: 30rpx;
+  z-index: 100;
 }
-.action-buttons .btn-half-width { /* btn btn-secondary/btn-primary */
-    flex: 1; /* 让两个按钮平分宽度 */
-    padding: 24rpx 0; /* 调整内边距 */
-    font-size: 30rpx;
-    text-align: center;
+.btn-half-width {
+  flex: 1;
+  height: 88rpx; line-height: 88rpx;
+  padding: 0; font-size: 30rpx; font-weight: 500;
+  border-radius: var(--border-radius-md);
+  text-align: center;
 }
-.action-buttons .btn-secondary {
-    background-color: var(--card-bg);
-    color: var(--accent-color);
-    border: 1rpx solid rgba(255, 140, 0, 0.3);
+.btn-secondary {
+  background-color: #FFF8E1; /* 浅橙黄色 */
+  color: var(--accent-color);
+  border: none;
 }
-.action-buttons .btn-primary {
-    background-color: var(--accent-color);
-    color: white;
+.btn-primary {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
 }

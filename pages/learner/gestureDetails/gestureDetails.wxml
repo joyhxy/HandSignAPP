@@ -1,68 +1,84 @@
 <!-- pages/learner/gestureDetails/gestureDetails.wxml -->
-<view class="container details-container">
-    <!-- 手势演示区 -->
-    <view class="media-placeholder">
-        <image wx:if="{{gesture.mediaType === 'image' || !gesture.mediaType}}" class="gesture-image" src="{{gesture.mediaUrl || '/assets/images/placeholder-image.png'}}" mode="aspectFit"/>
-        <!-- 如果是视频，可以使用 <video> 标签 -->
-        <!-- <video wx:if="{{gesture.mediaType === 'video'}}" src="{{gesture.mediaUrl}}" controls></video> -->
-        <view wx:if="{{!gesture.mediaUrl}}" class="placeholder-content">
-            <image class="play-icon" src="/assets/images/icon-play.png" mode="aspectFit"/>
-            <text>手势演示 (视频/动图)\n待补充</text>
+<view class="container details-page-container">
+   <!-- **手势演示区 (不再是互斥的)** -->
+   <view class="media-container">
+        <!-- **如果视频URL存在，就显示视频** -->
+        <video wx:if="{{gesture.videoUrl}}"
+               class="gesture-video"
+               src="{{gesture.videoUrl}}"
+               controls="{{true}}"
+               autoplay="{{false}}"
+               loop="{{true}}"
+               muted="{{true}}"
+               binderror="onMediaError" data-mediatype="video"></video>
+
+        <!-- **如果图片URL存在，就显示图片** -->
+        <image wx:if="{{gesture.imageUrl}}"
+               class="gesture-image"
+               src="{{gesture.imageUrl}}"
+               mode="aspectFit"
+               binderror="onMediaError" data-mediatype="image" />
+
+        <!-- **如果视频和图片都没有，显示占位符** -->
+        <view wx:if="{{!gesture.videoUrl && !gesture.imageUrl && !isLoading}}" class="media-placeholder">
+            <image class="placeholder-icon" src="/assets/images/media-placeholder-icon.png" mode="aspectFit"/>
+            <text>手势媒体待补充</text>
         </view>
     </view>
 
-    <!-- 手势名称和标签 -->
-    <view class="card info-card">
-        <view class="title-section">
-            <text class="h1 gesture-name">{{gesture.name || '手势名称'}}</text>
-            <text class="text-accent gesture-translation">{{gesture.translation || 'English Name'}}</text>
+    <!-- 内容区 -->
+    <view class="content-wrapper">
+        <!-- 手势名称和标签卡片 -->
+        <view class="card info-card">
+            <view class="title-section">
+                <text class="h1 gesture-name">{{gesture.name || '手势名称'}}</text>
+                <text class="p text-accent gesture-translation">{{gesture.translation || ''}}</text>
+            </view>
+            <view class="tags-section" wx:if="{{gesture.tags && gesture.tags.length > 0}}">
+                <text class="tag" wx:for="{{gesture.tags}}" wx:key="*this">{{item}}</text>
+            </view>
         </view>
-        <view class="tags-section" wx:if="{{gesture.tags && gesture.tags.length > 0}}">
-            <text class="tag" wx:for="{{gesture.tags}}" wx:key="*this">{{item}}</text>
-        </view>
-    </view>
 
-    <!-- 手势描述 -->
-    <view class="card description-card" wx:if="{{gesture.description}}">
-        <text class="h3 card-title">手势描述</text>
-        <!-- description 可能包含换行，需要处理或用 rich-text -->
-        <view wx:for="{{gesture.descriptionSteps}}" wx:key="*this" class="description-step">
-            <text class="p">{{item}}</text>
-        </view>
-    </view>
-
-    <!-- 用法示例 -->
-    <view class="card usage-card" wx:if="{{gesture.usageExamples && gesture.usageExamples.length > 0}}">
-        <text class="h3 card-title">用法示例</text>
-        <view class="usage-list">
-            <view wx:for="{{gesture.usageExamples}}" wx:key="index" class="usage-item">
-                <text class="list-dot">•</text>
+        <!-- 手势描述卡片 -->
+        <view class="card description-card" wx:if="{{gesture.descriptionSteps && gesture.descriptionSteps.length > 0}}">
+            <text class="h3 card-section-title">手势描述</text>
+            <view wx:for="{{gesture.descriptionSteps}}" wx:key="*this" class="description-step">
                 <text class="p">{{item}}</text>
             </view>
-            <!-- 如果有对话示例，可以特殊处理 -->
-            <view wx:if="{{gesture.dialogueExample}}" class="dialogue-example">
-                <text class="p">{{gesture.dialogueExample.title}}</text>
-                <view wx:for="{{gesture.dialogueExample.lines}}" wx:key="actor" wx:for-item="line" class="dialogue-line">
-                    <text class="p">{{line.actor}}: {{line.text}}</text>
+        </view>
+
+        <!-- 用法示例卡片 -->
+        <view class="card usage-card" wx:if="{{gesture.usageExamples && gesture.usageExamples.length > 0}}">
+            <text class="h3 card-section-title">用法示例</text>
+            <view class="usage-list">
+                <view wx:for="{{gesture.usageExamples}}" wx:key="index" class="usage-item">
+                    <text class="list-dot">•</text>
+                    <text class="p">{{item}}</text>
+                </view>
+                <view wx:if="{{gesture.dialogueExample}}" class="dialogue-example">
+                    <text class="p dialogue-title">{{gesture.dialogueExample.title}}</text>
+                    <view wx:for="{{gesture.dialogueExample.lines}}" wx:key="actor" wx:for-item="line" class="dialogue-line">
+                        <text class="p">{{line.actor}}: {{line.text}}</text>
+                    </view>
                 </view>
             </view>
         </view>
-    </view>
 
-    <!-- 易混淆手势 -->
-    <view class="card confusing-gestures-card" wx:if="{{gesture.confusingGestures && gesture.confusingGestures.length > 0}}">
-        <text class="h3 card-title">易混淆手势</text>
-        <view wx:for="{{gesture.confusingGestures}}" wx:key="name" class="confusing-item">
-            <view class="confusing-media-placeholder">
-                <image wx:if="{{item.mediaType === 'image' || !item.mediaType}}" src="{{item.mediaUrl || '/assets/images/placeholder-small.png'}}" mode="aspectFit"/>
-                <text wx:if="{{!item.mediaUrl}}">{{item.name}}\n待补充</text>
+        <!-- 易混淆手势卡片 -->
+        <view class="card confusing-gestures-card" wx:if="{{gesture.confusingGestures && gesture.confusingGestures.length > 0}}">
+            <text class="h3 card-section-title">易混淆手势</text>
+            <view wx:for="{{gesture.confusingGestures}}" wx:key="name" class="confusing-item">
+                <view class="confusing-media-placeholder">
+                    <image wx:if="{{item.mediaUrl}}" src="{{item.mediaUrl}}" mode="aspectFit"/>
+                    <text wx:else>{{item.name || '待补充'}}</text>
+                </view>
+                <text class="p text-sm confusing-description">{{item.description}}</text>
             </view>
-            <text class="p text-sm confusing-description">{{item.description}}</text>
         </view>
-    </view>
+    </view> <!-- .content-wrapper end -->
 
-    <!-- 操作按钮 -->
-    <view class="action-buttons">
+    <!-- 底部固定操作栏 -->
+    <view class="bottom-action-bar">
         <button class="btn btn-secondary btn-half-width" bindtap="addToPractice">加入练习</button>
         <button class="btn btn-primary btn-half-width" bindtap="markAsMastered">标记为已掌握</button>
     </view>

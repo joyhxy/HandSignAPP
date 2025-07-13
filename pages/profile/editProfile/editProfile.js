@@ -88,67 +88,100 @@ Page({
     });
   },
 
-  uploadAvatarApi: function(filePath) {
+  uploadAvatarApi: function(filePath) { // filePath 是 wx.chooseMedia 返回的临时路径
     return new Promise((resolve, reject) => {
       const currentUserId = app.globalData.userInfo ? app.globalData.userInfo.id : null;
-      const token = wx.getStorageSync('userToken');
+      const token = wx.getStorageSync('userToken'); // 获取Token，如果上传接口需要
 
-      if (!currentUserId) { // Token通常由request.js统一处理，这里主要检查userId
-        reject({ msg: '用户ID丢失，请重新登录' });
+      if (!currentUserId) {
+        const errMsg = '用户ID丢失，请重新登录后操作';
+        wx.showToast({ title: errMsg, icon: 'none' });
+        reject({ msg: errMsg });
+        return;
+      }
+      if (!filePath) {
+        const errMsg = '未选择有效的图片文件';
+        wx.showToast({ title: errMsg, icon: 'none' });
+        reject({ msg: errMsg });
         return;
       }
 
-      console.log(`Uploading avatar. UserID: ${currentUserId}, FilePath: ${filePath}`);
+      // 根据 OpenAPI 文档，id 是 Query 参数
+      const uploadUrl = `${IMAGE_BASE_URL}/user/img?id=${currentUserId.toString()}`;
+
+      console.log(`Attempting to upload avatar to: ${uploadUrl}`);
+      console.log(`Local file path: ${filePath}`);
+
       wx.uploadFile({
-        url: `${IMAGE_BASE_URL}/user/img?id=${currentUserId.toString()}`, // Query参数id
-        filePath: filePath,
-        name: 'avatarfile', // **与后端确认：文件字段名** (例如 'file', 'avatar', 'imgFile')
+        url: uploadUrl, // **上传的目标URL，已包含Query参数 id**
+        filePath: filePath, // **要上传的本地文件路径**
+        name: 'file',   // **核心：后端期望接收文件的表单字段名。你需要和timing确认这个名字！**
+                        // 例如，如果后端用 @RequestParam("avatar") MultipartFile avatar，那么这里应该是 'avatar'
         header: {
-          'Authorization': `Bearer ${token}`, // **根据实际Token传递方式修改**
+          // **根据后端要求设置请求头，例如 Token**
+          // 'Authorization': `Bearer ${token}`, // 如果需要认证
+          // 'Content-Type': 'multipart/form-data' // wx.uploadFile 会自动设置
+        },
+        formData: { // 如果除了文件，还需要传递其他普通的文本表单字段
+          // 'anotherParam': 'someValue'
+          // 根据 OpenAPI，没有其他 body 参数，id 已在 Query 中
         },
         success: (uploadRes) => {
-          console.log("头像上传API原始响应:", uploadRes);
+          console.log("wx.uploadFile success, raw server response:", uploadRes);
           if (uploadRes.statusCode === 200) {
             try {
-              const responseData = JSON.parse(uploadRes.data);
-              console.log("头像上传API解析后响应:", responseData);
-              if (responseData.code === 1) {
-                // **与后端确认：成功后，responseData.data中新头像URL的字段名**
-                // 假设是 responseData.data (如果data是字符串URL) 或 responseData.data.new_avatar_url
-                const newImageUrl = responseData.data || (responseData.data && responseData.data.new_avatar_url);
+              const responseData = JSON.parse(uploadRes.data); // 后端返回的应该是JSON字符串
+              console.log("Parsed server response from avatar upload:", responseData);
 
-                if (newImageUrl && typeof newImageUrl === 'string') {
-                  console.log("头像上传成功，新URL/路径:", newImageUrl);
-                  // 如果后端返回的是相对路径，在这里拼接 IMAGE_BASE_URL
-                  if (!(newImageUrl.startsWith('http://') || newImageUrl.startsWith('https://'))) {
-                      let imagePath = newImageUrl;
-                      if (IMAGE_BASE_URL.endsWith('/') && imagePath.startsWith('/')) imagePath = imagePath.substring(1);
-                      else if (!IMAGE_BASE_URL.endsWith('/') && !imagePath.startsWith('/')) { if(imagePath) imagePath = '/' + imagePath; }
-                      resolve(IMAGE_BASE_URL + imagePath);
+              if (responseData.code === 1) { // 业务成功
+                // **与后端确认：成功后，responseData.data 中新头像URL的字段名是什么？**
+                // 假设是 responseData.data.avatar_url 或 responseData.data (如果data直接是url字符串)
+                const newImageUrlFromServer = (responseData.data && responseData.data.avatar_url) ||
+                                            (responseData.data && typeof responseData.data === 'string' && responseData.data.startsWith('http') ? responseData.data : null) ||
+                                            (responseData.data && responseData.data.img); // 也兼容一下 img 字段
+
+                if (newImageUrlFromServer && typeof newImageUrlFromServer === 'string') {
+                  console.log("头像上传业务成功，后端返回新图片路径/URL:", newImageUrlFromServer);
+                  // 判断返回的是完整URL还是相对路径
+                  if (newImageUrlFromServer.startsWith('http://') || newImageUrlFromServer.startsWith('https://')) {
+                    resolve(newImageUrlFromServer);
                   } else {
-                      resolve(newImageUrl); // 已经是完整URL
+                    // 如果是相对路径，拼接 IMAGE_BASE_URL (但通常上传接口会返回完整URL)
+                    let imagePath = newImageUrlFromServer;
+                    if (IMAGE_BASE_URL.endsWith('/') && imagePath.startsWith('/')) imagePath = imagePath.substring(1);
+                    else if (!IMAGE_BASE_URL.endsWith('/') && !imagePath.startsWith('/')) { if(imagePath) imagePath = '/' + imagePath; }
+                    resolve(IMAGE_BASE_URL + imagePath);
                   }
                 } else {
-                  console.warn("头像上传成功，但未返回有效的新头像URL:", responseData.data);
-                  reject({ msg: '头像保存后未获取到新路径' });
+                  // 虽然 code=1，但没有有效的图片URL返回
+                  console.warn("头像上传业务成功，但响应中未包含有效的新头像URL:", responseData.data);
+                  // 这种情况下，可能需要前端再次调用获取用户信息的接口来得到最新头像
+                  // 或者，如果上传接口就是不返回新URL，前端可以用本地预览（但不准确）
+                  // 为了安全，如果没拿到URL，最好是reject或提示用户刷新
+                  reject({ msg: '头像已上传，但未能获取新头像地址' });
                 }
-              } else {
-                reject({ msg: responseData.msg || '头像保存失败(业务码0)' });
+              } else { // 业务失败 (code === 0 或其他)
+                reject({ msg: responseData.msg || '头像保存失败 (后端业务逻辑)', code: responseData.code, raw: responseData });
               }
-            } catch (e) {
-              reject({ msg: '头像响应解析错误' });
+            } catch (e) { // JSON 解析失败
+              console.error("头像上传响应JSON解析错误:", e, "Raw data from server:", uploadRes.data);
+              reject({ msg: '服务器响应数据格式错误' });
             }
-          } else {
-            reject({ msg: `头像上传HTTP错误: ${uploadRes.statusCode}` });
+          } else { // HTTP 状态码非 200
+            reject({ msg: `头像上传失败，服务器状态: ${uploadRes.statusCode}`, statusCode: uploadRes.statusCode, raw: uploadRes });
           }
         },
-        fail: (err) => {
-          console.error("头像上传网络请求失败:", err);
-          reject({ msg: '头像上传网络请求失败', errorDetail: err });
+        fail: (err) => { // wx.uploadFile 本身调用失败 (网络等原因)
+          console.error("wx.uploadFile API调用失败:", err);
+          reject({ msg: err.errMsg || '头像上传网络请求失败', errorDetail: err });
+        },
+        complete: () => {
+            // wx.hideLoading(); // 通常在 saveProfileChanges 中统一处理
         }
       });
     });
   },
+
 
   // --- 昵称修改 ---
   onNicknameInputChange: function(e) {

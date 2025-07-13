@@ -1,0 +1,6 @@
+{
+  "usingComponents": {},
+  "navigationBarTitleText": "交流论坛",
+  "enablePullDownRefresh": true,
+  "onReachBottomDistance": 100
+}

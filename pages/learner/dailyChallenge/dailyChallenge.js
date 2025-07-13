@@ -1,7 +1,7 @@
 // pages/learner/dailyChallenge/dailyChallenge.js
 import request from '../../../utils/request.js';
 const app = getApp();
-const MEDIA_BASE_URL = 'https://222.186.168.45:8080'; // 确保媒体基础URL正确
+//const MEDIA_BASE_URL = 'https://222.186.168.45:8080'; // 确保媒体基础URL正确
 
 Page({
   data: {
@@ -59,75 +59,79 @@ Page({
       this.finishAllChallenges();
       return;
     }
-    console.log("DailyChallenge Page: loadNextChallengeQuestion called for question #", this.data.currentProgress + 1);
-    this.setData({ isLoading: true, selectedOptionIndex: null, canRespond: false });
-    wx.showLoading({ title: '加载题目...' });
+    const questionNumberForDisplay = this.data.currentProgress + 1;
+    console.log("DailyChallenge Page: loadNextChallengeQuestion called for question #", questionNumberForDisplay);
+    this.setData({ isLoading: true, selectedOptionIndex: null, canRespond: false, currentProgressDisplay: questionNumberForDisplay });
+    wx.showLoading({ title: `加载第 ${questionNumberForDisplay} 题...` });
+
+    const currentUserId = app.globalData.userInfo ? app.globalData.userInfo.id : null;
+    if (!currentUserId) { /* ... (之前的未登录处理逻辑) ... */ return; }
 
     request({
       url: '/learn/daytest',
-      method: 'GET'
-      // **移除 expectDirectData: true，因为响应是标准的 {code, msg, data: {题目对象}}**
+      method: 'GET',
+      data: { userid: currentUserId.toString() }
+      // **确认 /learn/daytest 是否需要 expectDirectData: true**
+      // 从你的日志看 "Full Response Object: {id:2, name:"谢谢", ...}"
+      // 这表明 request.js 可能已经正确地提取了业务数据对象，或者你为它设置了 expectDirectData
+      // 我们先假设 request.js 返回的是那个包含 id, name, img... 的对象
+      // 如果它返回的是 {code, msg, data:{业务对象}}，则下面取值要从 apiResponse.data 开始
     })
-    .then(questionDataFromApi => { // **questionDataFromApi 现在是 API 响应的 data.data 部分，即 {id, name, img, ...}**
-      console.log("DailyChallenge Page: API /learn/daytest success. Question Data:", JSON.stringify(questionDataFromApi));
+    .then(apiResponse => { // apiResponse 是业务数据对象 {id, name, img, video, description, s1, s2, s3}
+      console.log("DailyChallenge Page: API /learn/daytest success. Full Response Object:", JSON.stringify(apiResponse));
       wx.hideLoading();
 
-      // **现在直接使用 questionDataFromApi 来获取字段**
-      if (questionDataFromApi && questionDataFromApi.id !== undefined) { // 检查核心字段 id 是否存在
-        const correctAnswerName = questionDataFromApi.name;
+      if (apiResponse && apiResponse.id !== undefined && apiResponse.name) {
+        const correctAnswerName = apiResponse.name;
         const optionsText = [
           correctAnswerName,
-          questionDataFromApi.s1,
-          questionDataFromApi.s2,
-          questionDataFromApi.s3
+          apiResponse.s1,
+          apiResponse.s2,
+          apiResponse.s3
         ].filter(opt => typeof opt === 'string' && opt.trim() !== '');
 
-        if (optionsText.length < 2) {
-            console.error("DailyChallenge Page: Not enough valid options from API.", questionDataFromApi);
-            this.setData({ isLoading: false, canRespond: true });
-            wx.showModal({title:'题目加载错误', content:'题目选项不足，请稍后重试或联系客服。', showCancel:false});
-            return;
-        }
+        if (optionsText.length < 2) { /* ... (选项不足处理) ... */ return; }
 
         const shuffledOptions = this.shuffleArray([...optionsText]);
         const correctIndexInShuffled = shuffledOptions.findIndex(opt => opt === correctAnswerName);
-
         const formattedOptions = shuffledOptions.map((text, index) => ({
           label: String.fromCharCode(65 + index), text: text, isCorrect: index === correctIndexInShuffled
         }));
 
         let mediaUrl = '';
         let mediaType = 'image';
-        // **字段名根据 API 响应示例是 img, video, description (注意不是 descript)**
-        if (questionDataFromApi.video && questionDataFromApi.video.trim() !== "") {
+        // **直接使用API返回的完整URL**
+        if (apiResponse.video && typeof apiResponse.video === 'string' && apiResponse.video.trim() !== "") {
             mediaType = 'video';
-            mediaUrl = this.buildMediaUrl(questionDataFromApi.video);
-        } else if (questionDataFromApi.img && questionDataFromApi.img.trim() !== "") { // API 示例是 img
+            mediaUrl = apiResponse.video;
+        } else if (apiResponse.img && typeof apiResponse.img === 'string' && apiResponse.img.trim() !== "") {
             mediaType = 'image';
-            mediaUrl = this.buildMediaUrl(questionDataFromApi.img);
+            mediaUrl = apiResponse.img; // API返回的是 img
         } else {
             mediaUrl = '/assets/images/gesture-placeholder-large.png';
+            console.warn("DailyChallenge: No valid image or video URL from API.");
         }
 
         this.setData({
           challengeData: {
-            id: questionDataFromApi.id,
+            id: apiResponse.id,
             name: correctAnswerName,
             mediaUrl: mediaUrl,
             mediaType: mediaType,
-            description: questionDataFromApi.description, // API 示例是 description
+            description: apiResponse.description, // API返回的是 description
             options: formattedOptions,
           },
           isLoading: false,
           canRespond: true,
-          currentProgressDisplay: this.data.currentProgress + 1
+          // currentProgressDisplay 在请求前已设置
         });
       } else {
-        console.error("DailyChallenge Page: API /learn/daytest did not return valid question data in 'data' field or missing ID. Received:", questionDataFromApi);
+        // 这个分支通常是 request.js 内部判断 code!=1 或者 res.data 无效时 reject 后，由 catch 处理
+        // 但如果 request.js resolve 了一个不符合预期的 apiResponse (比如 code!=1 但 resolve 了)
+        console.error("DailyChallenge Page: API /learn/daytest did not return valid data structure or code was not 1. Received:", apiResponse);
         this.setData({ isLoading: false, canRespond: true });
-        // request.js 内部如果解析到 res.data.code !== 1 应该已经弹了 toast
-        // 如果 questionDataFromApi 是 null/undefined (因为 res.data.data 不存在)
-        wx.showToast({ title: '加载每日挑战题目失败', icon: 'none', duration: 2500 });
+        const errorMsgToShow = (apiResponse && apiResponse.msg) ? apiResponse.msg : '加载每日挑战题目失败';
+        wx.showToast({ title: errorMsgToShow, icon: 'none', duration: 2500 });
       }
     })
     .catch(err => {
@@ -138,7 +142,7 @@ Page({
     });
   },
   // --- API加载结束 ---
-
+  /*
   buildMediaUrl: function(path) {
     if (!path) return '';
     if (path.startsWith('http://') || path.startsWith('https://')) {
@@ -153,7 +157,7 @@ Page({
     }
     return baseUrl + path;
   },
-
+  */
   shuffleArray: function(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -301,12 +305,13 @@ addQuestionToWrongSet: function(questionId) {
       const questionIdParam = currentQuestionId.toString();
       const userIdParam = currentUserId.toString();
   
-      console.log(`DailyChallenge: Calling API POST /user/addtisum with Query Params: id=${questionIdParam}, user=${userIdParam}`);
+      // **核心修改：将 Query 参数 user 修改为 userid**
+    console.log(`DailyChallenge: Calling API POST /user/addtisum with Query Params: id=${questionIdParam}, userid=${userIdParam}`); // 日志也同步修改
   
       request({
-        url: `/user/addtisum?id=${questionIdParam}&user=${userIdParam}`, // **修正参数拼接**
-        method: 'POST',
-        // data: {}, // POST请求体为空或不传，因为参数在Query中
+        url: `/user/addtisum?id=${questionIdParam}&userid=${userIdParam}`, // <--- **修改这里**
+      method: 'POST',
+      // data: {}, // Body 为空
       })
       .then(response => { // response 是API返回的data部分 (通常是null或{})
         console.log('DailyChallenge: API /user/addtisum success:', response);

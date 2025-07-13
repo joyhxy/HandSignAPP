@@ -180,6 +180,12 @@ Page({ // <--- 唯一的 Page({...}) 开始
         });
     },
 
+    navigateToForum: function() {
+      wx.navigateTo({
+          url: '/pages/forum/list/list' // 假设论坛列表页的路径
+      });
+  },
+
     practiceRecommendedChallenge: function(event) {
       const challengeId = this.data.dashboardData.recommendedChallenge ? this.data.dashboardData.recommendedChallenge.id : null;
       if (challengeId) {

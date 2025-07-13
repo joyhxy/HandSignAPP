@@ -1,0 +1,176 @@
+/* pages/forum/comments/comments.wxss */
+page {
+  --page-bg-color: white; /* 发布页通常用白色背景，更聚焦内容 */
+  --form-input-bg-color: #F7F8FA; /* 输入框的浅灰色背景 */
+  --border-color: #EBEDF0; /* 分割线和边框颜色 */
+  --placeholder-color: #C8C9CC; /* 提示文字颜色 */
+  --text-color-dark: #323233;
+  --text-color-light: #969799;
+  --accent-color: #FF8C00; /* 主题色 */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+  --border-radius-md: 16rpx;
+  --shadow-light: 0 4rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+view, text, input, textarea, button, label, image {
+  box-sizing: border-box;
+}
+
+.comments-page-container {
+    display: flex; flex-direction: column;
+    height: 100vh;
+    background-color: var(--bg-color, #F8F4F0);
+    font-family: var(--font-family);
+}
+
+.original-post-summary-card {
+    padding: 20rpx 40rpx;
+    background-color: white;
+    border-bottom: 1rpx solid #f0f0f0;
+    flex-shrink: 0;
+}
+.original-post-summary-card .author-info { display: flex; align-items: center; margin-bottom: 16rpx; }
+.original-post-summary-card .author-avatar { width: 60rpx; height: 60rpx; border-radius: 50%; margin-right: 16rpx; }
+.original-post-summary-card .author-name { font-size: 26rpx; }
+.original-post-summary-card .post-title { font-size: 30rpx; color: var(--text-color-dark); line-height: 1.4; }
+
+
+.comments-scroll-view {
+    flex-grow: 1;
+    height: 100%;
+    padding-bottom: calc(120rpx + env(safe-area-inset-bottom)); /* 为输入框留出空间 */
+}
+.comments-section-title { /* h3 */
+    display: block; font-size: 28rpx; font-weight: 600;
+    color: var(--text-color-dark);
+    padding: 30rpx 40rpx 20rpx;
+}
+.comments-list {
+    background-color: white;
+    padding: 0 40rpx;
+}
+.comment-item {
+    display: flex;
+    padding: 30rpx 0;
+    border-bottom: 1rpx solid #f0f0f0;
+}
+.comment-item:last-child { border-bottom: none; }
+.commenter-avatar {
+    width: 70rpx; height: 70rpx;
+    border-radius: 50%; margin-right: 20rpx;
+    flex-shrink: 0; background-color: var(--placeholder-bg);
+}
+.comment-content-wrapper { flex-grow: 1; }
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* 顶部对齐，防止删除按钮把名字顶上去 */
+  margin-bottom: 8rpx;
+}
+.commenter-name {
+  flex-grow: 1; /* 让名字占据多余空间 */
+  font-size: 26rpx;
+  color: var(--text-color-dark);
+  font-weight: 500;
+}
+/* **新增：删除按钮样式** */
+.delete-comment-btn {
+  flex-shrink: 0; /* 防止被压缩 */
+  color: var(--text-color-light, #969799);
+  font-size: 24rpx;
+  padding: 4rpx 10rpx; /* 增加点击热区 */
+  margin-left: 20rpx; /* 与名字的间距 */
+}
+.delete-comment-btn:active {
+  background-color: #f0f0f0;
+  border-radius: 8rpx;
+}
+.comment-timestamp { font-size: 22rpx; color: var(--text-color-light); }
+.comment-text { /* p */
+    font-size: 28rpx; color: var(--text-color-dark);
+    line-height: 1.6; word-break: break-all;
+}
+.comment-actions {
+  display: flex;
+  justify-content: flex-end; /* 操作项靠右 */
+  margin-top: 16rpx;
+}
+
+.comment-actions .action-item {
+  display: flex;
+  align-items: center;
+  color: var(--text-color-light);
+  padding: 8rpx 12rpx; /* 给点击区域一点padding */
+  border-radius: var(--border-radius-md);
+}
+.comment-actions .action-item:active {
+  background-color: #f5f5f5;
+}
+
+.comment-actions .action-icon {
+  width: 32rpx; /* **核心修改：缩小图标宽度** */
+  height: 32rpx; /* **核心修改：缩小图标高度** */
+  margin-right: 8rpx;
+  opacity: 0.6;
+}
+.comment-actions .action-count {
+  font-size: 24rpx;
+}
+
+/* 点赞激活状态 */
+.comment-actions .action-item.like-action.active .action-icon {
+  opacity: 1;
+}
+.comment-actions .action-item.like-action.active .action-count {
+  color: var(--accent-color);
+  font-weight: 600;
+}
+/* 复用 list.wxss 中的 .action-item, .like-action, .active, .action-icon, .action-count 样式 */
+.empty-state, .no-more-comments, .loading-state {
+  padding: 60rpx 0;
+  text-align: center;
+  font-size: 26rpx;
+  color: var(--text-color-light, #969799);
+}
+
+.empty-state {
+  /* 你可以在 WXML 中为它增加一个图标 */
+  /* <image class="empty-icon" src="..."/> */
+  padding-top: 150rpx; /* 空状态时，提示可以更居中一些 */
+}
+/* 底部评论输入栏 */
+.comment-input-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background-color: #f7f7f7;
+    border-top: 1rpx solid #e0e0e0;
+    padding: 16rpx 24rpx;
+    padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
+    display: flex;
+    align-items: center;
+    gap: 20rpx;
+    z-index: 100;
+}
+.input-wrapper {
+    flex-grow: 1;
+    background-color: white;
+    border-radius: 36rpx;
+    padding: 0 24rpx;
+}
+.comment-input-field {
+    height: 72rpx;
+    line-height: 72rpx;
+    font-size: 28rpx;
+}
+.btn-submit-comment { /* btn btn-sm */
+    flex-shrink: 0;
+    padding: 0 40rpx;
+    height: 72rpx; line-height: 72rpx;
+    background-color: var(--accent-color);
+    color: white;
+    border-radius: 36rpx;
+    font-size: 28rpx;
+}
+.btn-submit-comment[disabled] {
+    background-color: #fabd7a; /* 禁用时颜色变浅 */
+    color: #fff;
+}

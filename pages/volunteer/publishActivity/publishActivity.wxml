@@ -26,38 +26,36 @@
             </view>
 
             <view class="form-group">
-                <label class="form-label">活动时间 <text class="required-mark">*</text></label>
-                <view class="time-picker-row">
-                    <!-- 开始日期 -->
-                    <picker mode="date" value="{{formDisplay.startDate}}" bindchange="onDateChange" data-field="startDate" start="{{minDate}}">
-                        <view class="picker-display-box half {{formDisplay.startDate ? 'selected' : 'placeholder'}}">
-                            <!-- **修改这里的条件和格式化** -->
-                            {{formDisplay.startDate && formDisplay.startDate.includes('-') ? (formDisplay.startDate.split('-')[0] + '年' + formDisplay.startDate.split('-')[1] + '月' + formDisplay.startDate.split('-')[2] + '日') : (formDisplay.startDate || '选择开始日期')}}
-                        </view>
-                    </picker>
-                    <!-- 开始时间 (时间格式通常没问题) -->
-                    <picker mode="time" value="{{formDisplay.startTime}}" bindchange="onTimeChange" data-field="startTime">
-                         <view class="picker-display-box half {{formDisplay.startTime ? 'selected' : 'placeholder'}}">
-                            {{formDisplay.startTime || '选择开始时间'}}
-                        </view>
-                    </picker>
-                </view>
-                <view class="time-picker-row end-time-row">
-                     <!-- 结束日期 -->
-                     <picker mode="date" value="{{formDisplay.endDate}}" bindchange="onDateChange" data-field="endDate" start="{{formDisplay.startDate || minDate}}">
-                        <view class="picker-display-box half {{formDisplay.endDate ? 'selected' : 'placeholder'}}">
-                             <!-- **修改这里的条件和格式化** -->
-                             {{formDisplay.endDate && formDisplay.endDate.includes('-') ? (formDisplay.endDate.split('-')[0] + '年' + formDisplay.endDate.split('-')[1] + '月' + formDisplay.endDate.split('-')[2] + '日') : (formDisplay.endDate || '选择结束日期')}}
-                        </view>
-                    </picker>
-                     <!-- 结束时间 -->
-                     <picker mode="time" value="{{formDisplay.endTime}}" bindchange="onTimeChange" data-field="endTime">
-                         <view class="picker-display-box half {{formDisplay.endTime ? 'selected' : 'placeholder'}}">
-                            {{formDisplay.endTime || '选择结束时间'}}
-                        </view>
-                    </picker>
-                </view>
+    <label class="form-label">活动时间 <text class="required-mark">*</text></label>
+    <view class="time-picker-row">
+        <picker name="starttime_date" mode="date" value="{{formData.startDate}}"
+                bindchange="onDateChange" data-field="startDate" start="{{minDate}}">
+            <view class="picker-display-box half {{formData.startDate ? 'selected' : 'placeholder'}}">
+                {{formData.startDate || '选择开始日期'}} <!-- **直接用 formData.startDate** -->
             </view>
+        </picker>
+        <picker name="starttime_time" mode="time" value="{{formData.startTime}}"
+                bindchange="onTimeChange" data-field="startTime">
+             <view class="picker-display-box half {{formData.startTime ? 'selected' : 'placeholder'}}">
+                {{formData.startTime || '选择开始时间'}} <!-- **直接用 formData.startTime** -->
+            </view>
+        </picker>
+    </view>
+    <view class="time-picker-row end-time-row">
+         <picker name="endtime_date" mode="date" value="{{formData.endDate}}"
+                 bindchange="onDateChange" data-field="endDate" start="{{formData.startDate || minDate}}">
+            <view class="picker-display-box half {{formData.endDate ? 'selected' : 'placeholder'}}">
+                {{formData.endDate || '选择结束日期'}} <!-- **直接用 formData.endDate** -->
+            </view>
+        </picker>
+         <picker name="endtime_time" mode="time" value="{{formData.endTime}}"
+                 bindchange="onTimeChange" data-field="endTime">
+             <view class="picker-display-box half {{formData.endTime ? 'selected' : 'placeholder'}}">
+                {{formData.endTime || '选择结束时间'}} <!-- **直接用 formData.endTime** -->
+            </view>
+        </picker>
+    </view>
+</view>
 
             <view class="form-group">
                 <label class="form-label">活动地点 <text class="required-mark">*</text></label>
