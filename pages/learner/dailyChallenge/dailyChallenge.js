@@ -1,7 +1,7 @@
 // pages/learner/dailyChallenge/dailyChallenge.js
 import request from '../../../utils/request.js';
 const app = getApp();
-//const MEDIA_BASE_URL = 'https://222.186.168.45:8080'; // 确保媒体基础URL正确
+
 
 Page({
   data: {
@@ -98,32 +98,29 @@ Page({
           label: String.fromCharCode(65 + index), text: text, isCorrect: index === correctIndexInShuffled
         }));
 
-        let mediaUrl = '';
-        let mediaType = 'image';
-        // **直接使用API返回的完整URL**
-        if (apiResponse.video && typeof apiResponse.video === 'string' && apiResponse.video.trim() !== "") {
-            mediaType = 'video';
-            mediaUrl = apiResponse.video;
-        } else if (apiResponse.img && typeof apiResponse.img === 'string' && apiResponse.img.trim() !== "") {
-            mediaType = 'image';
-            mediaUrl = apiResponse.img; // API返回的是 img
-        } else {
-            mediaUrl = '/assets/images/gesture-placeholder-large.png';
-            console.warn("DailyChallenge: No valid image or video URL from API.");
+        let imageUrl = null;
+        let videoUrl = null;
+
+        if (apiResponse.img && apiResponse.img.startsWith('http')) {
+            imageUrl = apiResponse.img;
+        }
+        if (apiResponse.video && apiResponse.video.startsWith('http')) {
+            videoUrl = apiResponse.video;
         }
 
         this.setData({
           challengeData: {
             id: apiResponse.id,
             name: correctAnswerName,
-            mediaUrl: mediaUrl,
-            mediaType: mediaType,
-            description: apiResponse.description, // API返回的是 description
+            imageUrl: imageUrl, // 保存图片URL
+            videoUrl: videoUrl, // 保存视频URL
+            description: apiResponse.description,
             options: formattedOptions,
           },
           isLoading: false,
           canRespond: true,
-          // currentProgressDisplay 在请求前已设置
+          showAnswer: false, // **重置答案显示状态**
+          currentProgressDisplay: this.data.currentProgress + 1
         });
       } else {
         // 这个分支通常是 request.js 内部判断 code!=1 或者 res.data 无效时 reject 后，由 catch 处理
@@ -177,37 +174,104 @@ Page({
       if (this.data.selectedOptionIndex === null) wx.showToast({ title: '请选择一个答案', icon: 'none' });
       return;
     }
-    this.setData({ canRespond: false });
+    this.setData({
+        canRespond: false, // 确认后暂时不能再操作
+        showAnswer: true   // **核心修改：显示答案高亮**
+    });
 
-    const currentQuestionId = this.data.challengeData.id; // 当前题目ID
     const selectedOpt = this.data.challengeData.options[this.data.selectedOptionIndex];
-    const correct = selectedOpt.isCorrect;
+    const isCorrect = selectedOpt.isCorrect;
+    const currentQuestionId = this.data.challengeData.id;
 
-    const userAnswer = {
-        questionId: currentQuestionId,
-        selectedOptionText: selectedOpt.text,
-        isCorrect: correct,
-        correctAnswerText: this.data.challengeData.name // 正确答案的文本
-    };
-    this.data.userAnswers.push(userAnswer);
-    // this.setData({ userAnswers: this.data.userAnswers }); // 如果需要WXML响应
+    if (isCorrect) {
+      // **答对后，不再只用 Toast，而是用 Modal 给出更丰富的反馈**
+      this.incrementCorrectAnswerCount(); // 先调用API记录
+      setTimeout(() => {
+        wx.showModal({
+          title: '回答正确！🎉',
+          content: `太棒了，手势 "${this.data.challengeData.name}" 的含义就是这个！`,
+          confirmText: '下一题',
+          showCancel: false, // 不给用户取消的机会，直接进入下一题
+          success: (res) => {
+            if (res.confirm) {
+              this.setData({ currentProgress: this.data.currentProgress + 1 });
+              this.loadNextChallengeQuestion();
+            }
+          }
+        });
+      }, 800); // 延迟800ms让用户看到高亮效果
 
-    if (correct) {
-      wx.showToast({ title: '回答正确!', icon: 'success', duration: 1000 });
-      this.incrementCorrectAnswerCount();
-    } else {
-      wx.showToast({ title: '回答错误', icon: 'error', duration: 1000 });
-      // **回答错误后，调用API将题目加入错题集**
-      if (currentQuestionId) { // 确保有题目ID
-        this.addQuestionToWrongSet(currentQuestionId); // <--- 新增调用
+    } else { // 回答错误
+      if (currentQuestionId) {
+        this.addQuestionToWrongSet(currentQuestionId); // 调用API加入错题本
       }
+      setTimeout(() => {
+        const correctAnswerText = this.data.challengeData.name;
+        const correctAnswerLabel = this.data.challengeData.options.find(opt=>opt.isCorrect)?.label || '';
+        wx.showModal({
+          title: '回答错误',
+          content: `正确答案是 ${correctAnswerLabel ? `${correctAnswerLabel}. ` : ''}"${correctAnswerText}"。`,
+          confirmText: '下一题',
+          cancelText: '查看解析', // 提供查看详情的选项
+          showCancel: true,
+          success: (res) => {
+            if (res.confirm) { // 用户点击“下一题”
+              this.setData({ currentProgress: this.data.currentProgress + 1 });
+              this.loadNextChallengeQuestion();
+            } else if (res.cancel) { // 用户点击“查看解析”
+              wx.navigateTo({
+                url: `/pages/learner/gestureDetails/gestureDetails?id=${currentQuestionId}`,
+                // 从详情页返回后，会自动回到当前题目，用户可以选择再看一次或直接点下一题（如果流程设计如此）
+                // 为了简化，我们让用户看完解析后，也自动进入下一题
+                complete: () => {
+                    this.setData({ currentProgress: this.data.currentProgress + 1 });
+                    this.loadNextChallengeQuestion();
+                }
+              });
+            }
+          }
+        });
+      }, 800);
+    }
+  },
+   // --- **核心：加入错题集的方法** ---
+   addQuestionToWrongSet: function(questionId) {
+    const currentUserId = app.globalData.userInfo ? app.globalData.userInfo.id : null;
+    if (!currentUserId || !app.globalData.isLoggedIn) {
+      console.warn("DailyChallenge: User not logged in, cannot add question to wrong set.");
+      return;
     }
 
-    setTimeout(() => {
-        // 增加已完成题目计数
-        this.setData({ currentProgress: this.data.currentProgress + 1 });
-        this.loadNextChallengeQuestion(); // 加载下一题或结束
-    }, 1200);
+    const questionIdParam = questionId.toString();
+    const userIdParam = currentUserId.toString();
+
+    console.log(`DailyChallenge: Attempting to add question ID ${questionIdParam} to wrong set for user ID ${userIdParam} via POST /learn/wrong`);
+
+    request({
+      url: `/learn/wrong?id=${questionIdParam}&userid=${userIdParam}`, // **Query参数 id 和 userid**
+      method: 'POST',
+      data: {} // Body 为空
+      // **接口响应是 {code, msg, data}, 不需要 expectDirectData**
+    })
+    .then(response => { // response 是 data 部分 (null 或 {})
+      console.log('DailyChallenge: API /learn/wrong success response:', response);
+      // 根据文档，code=1时，data为null。所以这里可能什么都不用做，或者给一个轻提示
+      // wx.showToast({ title: '已记录到错题本', icon: 'none', duration: 1000 });
+    })
+    .catch(err => {
+      console.error('DailyChallenge: API /learn/wrong FAILED or code=0:', err);
+      // **处理“已加入错题集”的特殊情况**
+      // err 对象应该是 {msg: "已加入错题集", code: 0, rawResponse: {...}}
+      if (err && err.msg === "已加入错题集") {
+        console.log("Question was already in the wrong set.");
+        // 这种情况是正常的，可以不向用户显示错误
+      } else {
+        // 其他真正的错误
+        console.error("Failed to add question to wrong set for a different reason:", err);
+        // 可以考虑给一个非阻塞的提示
+        // wx.showToast({ title: '添加到错题本失败', icon: 'none' });
+      }
+    });
   },
 
   finishAllChallenges: function() {
@@ -237,54 +301,48 @@ Page({
         // }
     });
   },
-// --- ***** 严格按照文档修改这个函数 ***** ---
-addQuestionToWrongSet: function(questionId) {
-  const currentUserId = app.globalData.userInfo ? app.globalData.userInfo.id : null;
-
-  // 依然需要登录和用户ID检查
-  if (!currentUserId || !app.globalData.isLoggedIn) {
-    console.warn("DailyChallenge: User not logged in or no user ID. Cannot add question to wrong set.");
-    return;
-  }
-
-  // API文档中 id 和 userid 都是 integer schema, 但 example 是 string/integer 混合
-  // Query 参数通常传递字符串更安全，后端进行类型转换
-  const questionIdStr = questionId.toString();
-  const userIdStr = currentUserId.toString();
-
-  console.log(`DailyChallenge: Adding question ID ${questionIdStr} to wrong set for user ID ${userIdStr} via POST /learn/wrong`);
-
-  request({
-    url: `/learn/wrong?id=${questionIdStr}&userid=${userIdStr}`, // **将参数直接拼接到URL的Query String中**
-    method: 'POST',                                          // **方法是POST**
-    // data: {}, // **Request Body 为空对象，或不传递 data 属性，取决于 request.js 的实现**
-                // **如果 request.js 在 method:POST 且 data 未定义时会发送一个空body或合适的Content-Type，则可以不传 data**
-                // **为保险起见，可以传一个空对象 data: {}**
-    // 此接口响应是 {code, msg, data:null/object}，不需要 expectDirectData: true
-  })
-  .then(response => { // response 现在是 {code, msg, data}
-    console.log('DailyChallenge: API /learn/wrong response:', response);
-    if (response.code === 1) {
-        wx.showToast({ title: '已加入错题本', icon: 'success' });
-    } else if (response.code === 0 && response.msg === "已加入错题集") {
-        wx.showToast({ title: '已在错题本中', icon: 'none' });
-    } else if (response.msg) { // 其他 code=0 但有 msg 的情况
-        wx.showToast({ title: response.msg, icon: 'none' });
+  addQuestionToWrongSet: function(questionId) {
+    const currentUserId = app.globalData.userInfo ? app.globalData.userInfo.id : null;
+    if (!currentUserId || !app.globalData.isLoggedIn) {
+      console.warn("DailyChallenge: User not logged in, cannot add question to wrong set.");
+      return;
     }
-})
-  .catch(err => { // err 是 request.js reject 出来的 {msg, code, rawResponse}
-    console.error('DailyChallenge: API /learn/wrong FAILED:', err);
-    if (err && err.rawResponse && err.rawResponse.data && err.rawResponse.data.msg === "已加入错题集") {
-      // 如果 request.js 在 code=0 时 reject，但我们想把 "已加入错题集" 当作一种提示
-      console.log("Question already in wrong set (caught as error).");
-      wx.showToast({ title: '已在错题本中', icon: 'none', duration: 1500 });
-    } else {
-      wx.showToast({ title: err.msg || '加入错题本失败', icon: 'none', duration: 1500 });
-    }
-  });
-},
-// --- ***** 函数修改结束 ***** ---
 
+    const questionIdParam = questionId.toString();
+    const userIdParam = currentUserId.toString();
+
+    console.log(`DailyChallenge: Adding question ID ${questionIdParam} to wrong set for user ID ${userIdParam} via POST /learn/wrong`);
+
+    // **为了处理特殊的响应，我们让 request.js 返回整个 res.data**
+    // **这需要 request.js 支持一个选项，或者我们在 .catch 里处理**
+    // **更简单的做法是，如果 request.js 遵循 resolve(res.data.data) 的规则，
+    // 那么成功时 `.then` 的回调参数就是 null，我们直接处理即可。**
+
+    request({
+      url: `/learn/wrong?id=${questionIdParam}&userid=${userIdParam}`,
+      method: 'POST',
+      data: {}
+    })
+    .then(responseFromDataField => { // responseFromDataField 是 res.data.data 的值, 即 null
+      console.log('DailyChallenge: API /learn/wrong success. The "data" part of response is:', responseFromDataField);
+      // **既然 code:1 已经由 request.js 判断过了，这里就代表操作成功了**
+      // 我们不需要再判断 response.code
+      wx.showToast({ title: '已加入错题本', icon: 'success', duration: 1500 });
+    })
+    .catch(err => {
+      console.error('DailyChallenge: API /learn/wrong FAILED or biz code=0:', err);
+      // **处理“已加入错题集”的特殊情况**
+      // err 对象应该是 {msg: "已加入错题集", code: 0, rawResponse: {...}}
+      if (err && err.msg === "已加入错题集") {
+        console.log("Question was already in the wrong set.");
+        wx.showToast({ title: '已在错题本中', icon: 'none', duration: 1500 });
+      } else {
+        // 其他真正的错误
+        console.error("Failed to add question to wrong set for a different reason:", err);
+        wx.showToast({ title: err.msg || '加入错题本失败', icon: 'none' });
+      }
+    });
+  },
 
     // --- ***** 重点修改这个函数 ***** ---
     incrementCorrectAnswerCount: function() {
@@ -331,7 +389,7 @@ addQuestionToWrongSet: function(questionId) {
 
   showHint: function() {
     const hintText = this.data.challengeData.description
-                     ? `提示：${this.data.challengeData.description.substring(0, 30)}...` // 增加提示字数
+                     ? `提示：${this.data.challengeData.description.substring(0, 50)}...` // 增加提示字数
                      : '暂无提示，加油哦！';
     wx.showModal({
         title: '提示',

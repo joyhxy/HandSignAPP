@@ -1,33 +1,61 @@
 <!-- pages/learner/wrongAnswers/wrongAnswers.wxml -->
-<view class="container wrong-answers-page">
-    <text class="h1 page-main-title">错题回顾</text>
-    <view class="gestures-grid" wx:if="{{wrongAnswerItems.length > 0}}">
-        <view class="card gesture-card-item wrong-item-card"
-              wx:for="{{wrongAnswerItems}}" wx:key="id">
-            <view class="card-main-content" bindtap="navigateToGestureDetail" data-id="{{item.id}}">
-                <view class="gesture-image-placeholder">
-                    <image wx:if="{{item.imageUrl}}" class="gesture-image" src="{{item.imageUrl}}" mode="aspectFit"/>
-                    <text wx:else>图片待补充</text>
-                </view>
-                <view class="gesture-card-content">
-                    <text class="p gesture-name">{{item.name}}</text>
-                </view>
-            </view>
-            <!-- 新增：移除按钮 -->
-            <view class="remove-button-wrapper">
-                <button class="btn btn-icon btn-remove-wrong-item"
-                        size="mini" type="warn" 
-                        bindtap="confirmRemoveWrongItem" data-id="{{item.id}}" data-name="{{item.name}}">
-                    <image src="/assets/images/icon-delete-red.png" class="remove-icon"/>
-                    <!-- 移除 -->
-                </button>
-            </view>
-        </view>
+<view class="container wrong-answers-page-container">
+    <view class="page-header">
+        <text class="h1 page-main-title">错题回顾</text>
+        <!-- 使用 wx:if 而不是 wx:else，确保在加载完成且有数据时才显示 -->
+        <text class="p page-subtitle" wx:if="{{!isLoading && wrongAnswerItems.length > 0}}">
+            已为你整理了 {{wrongAnswerItems.length}} 道错题，要多加练习哦！
+        </text>
     </view>
 
-    <view wx:if="{{wrongAnswerItems.length === 0 && !isLoading && !firstLoad}}" class="empty-state">
-        <image class="empty-icon" src="/assets/images/empty-wrong-set.png" mode="aspectFit" /> <!-- 准备一个错题本空状态图 -->
-        <text class="p">太棒了，错题本是空的！</text>
-    </view>
-    <!-- ... 其他加载状态和无更多提示 ... -->
+    <!-- 列表滚动区域 -->
+    <scroll-view scroll-y="true" class="list-scroll-view"
+                 bindscrolltolower="onReachBottom"
+                 refresher-enabled="true"
+                 refresher-triggered="{{isPullingDown}}"
+                 bindrefresherrefresh="onPullDownRefresh">
+        
+        <!-- **核心：检查 wx:for 绑定的变量名是否正确** -->
+        <view class="wrong-answers-list" wx:if="{{wrongAnswerItems.length > 0}}">
+            <view class="card item-card" wx:for="{{wrongAnswerItems}}" wx:key="id" wx:for-index="index">
+                
+                <!-- 卡片主要内容区，点击跳转 -->
+                <view class="item-content-main" bindtap="navigateToGestureDetail" data-id="{{item.id}}">
+                    <image class="item-image"
+                           src="{{item.imageUrl}}"
+                           mode="aspectFit"
+                           binderror="onImageError"
+                           data-index="{{index}}" />
+                    <view class="item-text-info">
+                        <text class="p text-dark font-bold item-name">{{item.name}}</text>
+                        <text class="p text-sm item-description">{{item.description}}</text>
+                    </view>
+                </view>
+
+                <!-- 删除按钮 -->
+                <view class="delete-action-wrapper" catchtap="confirmRemoveWrongItem" data-id="{{item.id}}" data-index="{{index}}" data-name="{{item.name}}">
+                    <image class="delete-icon" src="/assets/svgs/icon-delete.svg" mode="aspectFit"/>
+                </view>
+            </view>
+        </view>
+        
+        <!-- 空状态显示 -->
+        <view wx:if="{{wrongAnswerItems.length === 0 && !isLoading && !firstLoad}}" class="empty-state">
+            <image class="empty-icon" src="/assets/images/empty-placeholder-correct.png" mode="aspectFit"/>
+            <text class="p empty-text">太棒了！错题本是空的！</text>
+        </view>
+
+        <!-- 首次加载占位 -->
+        <view wx:if="{{isLoading && firstLoad}}" class="loading-state">
+             <text>正在整理错题...</text>
+        </view>
+
+        <!-- 列表底部状态 -->
+        <view class="list-bottom-state" wx:if="{{!hasMoreData && wrongAnswerItems.length > 0 && !isLoading}}">
+            <text>~ 没有更多错题了 ~</text>
+        </view>
+        <view class="list-bottom-state" wx:if="{{isLoading && wrongAnswerItems.length > 0}}">
+            <text>正在加载更多...</text>
+        </view>
+    </scroll-view>
 </view>
