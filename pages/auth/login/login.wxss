@@ -96,3 +96,9 @@ page {
   /* text-decoration: underline; */ /* 小程序不支持 text-decoration */
   padding: 0 4rpx; /* 给链接一点点击区域 */
 }
+.guest-mode-link {
+  margin-top: 30rpx;
+  font-size: 28rpx;
+  color: #888888;
+  text-align: center;
+}
